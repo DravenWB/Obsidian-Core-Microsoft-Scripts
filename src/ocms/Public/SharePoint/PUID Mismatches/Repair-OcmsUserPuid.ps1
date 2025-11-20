@@ -1,3 +1,6 @@
+# ADD -Mode Nuke
+# ADD -Mode Repair
+
 ####################################################################################################################################################################################
 # Description: This script is built to reset PUID mismatches for a user that is experiencing issues with sharing files, accessing sites they've been given permissions to, etc.
 #
@@ -274,7 +277,7 @@ foreach ($Site in $SiteDirectory)
     {
         #Display progress bar for PUID mismatch resets.
         $ProgressPercent = ($IndexCounter / $SiteDirectory.Count) * 100
-        $ProgressPercet = $ProgressPercent.ToString("#.##")
+        $ProgressPercent = $ProgressPercent.ToString("#.##")
         Write-Progress -Activity "Manual PUID Reset Processing..." -Status "$ProgressPercent% Complete:" -PercentComplete $ProgressPercent
 
         #Initialize errors to blank space to ensure proper listing + clearing of old data if available.
@@ -319,7 +322,7 @@ foreach ($Site in $SiteDirectory)
                 }
         
         #Check user presence on the site being processed. If they exist, remove them. If not, move to the next item.
-        if (Get-SPOUser -Site $Site.Url | Where {$_.LoginName -eq $UserUPN})
+        if (Get-SPOUser -Site $Site.Url | Where-Object {$_.LoginName -eq $UserUPN})
             {
                 $UserTime = Get-Date -Format "HH:mm"
 

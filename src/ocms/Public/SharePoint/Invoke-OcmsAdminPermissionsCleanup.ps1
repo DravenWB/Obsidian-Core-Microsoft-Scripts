@@ -86,7 +86,7 @@ foreach ($Site in $SiteDirectory)
     {
         #Display progress bar for admin/owner checks.
         $ProgressPercent = ($IndexCounter / $SiteDirectory.Count) * 100
-        $ProgressPercet = $ProgressPercent.ToString("#.##")
+        $ProgressPercent = $ProgressPercent.ToString("#.##")
         Write-Progress -Activity "Setting Site Admin Permissions..." -Status "$ProgressPercent% Complete:" -PercentComplete $ProgressPercent
 
         #Check if user is part of the site.
@@ -105,7 +105,7 @@ foreach ($Site in $SiteDirectory)
                 $User = Get-SPOUser -Site $Site.Url -LoginName $SharePointAdminUPN
 
                 #Get site owner group name(s).
-                if ($User.Groups -notcontains (Get-SPOSiteGroup -Site $Site.Url | Where {$_.Roles -contains "Full Control"}).Title)
+                if ($User.Groups -notcontains (Get-SPOSiteGroup -Site $Site.Url | Where-Object {$_.Roles -contains "Full Control"}).Title)
                     {
                         Set-SPOUser -Site $Site.Url -LoginName $SharePointAdminUPN -IsSiteCollectionAdmin $false
                     }

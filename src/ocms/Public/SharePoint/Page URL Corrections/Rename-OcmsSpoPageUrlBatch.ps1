@@ -154,7 +154,7 @@ foreach ($Site in $SiteDirectory)
     $SiteRefURL = ("/sites/" + ((Get-SPOSite -Identity "https://spocotest.sharepoint.com/sites/Testsite65").Url -split("/"))[-1] + "/" + "SitePages")
 
     #Get all pages that do not start with the relative site URL.
-    $CurrentSitePages = Get-PnPListItem -List "Site Pages" | Where {-Not $_.FieldValues.FileRef.StartsWith($SiteRefURL)}
+    $CurrentSitePages = Get-PnPListItem -List "Site Pages" | Where-Object {-Not $_.FieldValues.FileRef.StartsWith($SiteRefURL)}
 
     #For all pages that don't match and have broken navigation...
     foreach ($Page in $CurrentSitePages)
