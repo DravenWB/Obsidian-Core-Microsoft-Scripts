@@ -61,16 +61,8 @@ if ($Menu -eq 1)
 #Configure tenant admin center URL from user input.
 $SPOAdminCenterURL = "https://$TenantName-admin.sharepoint.$Endpoint"
 
-#Connect to the SPO service and try geo-location locks if required.
-try {Connect-SPOService -Url $SPOAdminCenterURL}
-    catch{
-        if($Endpoint -eq ".us") {
-            try {Connect-SPOService -Url $SPOAdminCenterURL -Region ITAR}
-                catch {Write-Error -ForegroundColor Red "Failed to connect to the GCC-High SPO Service with the following error:" $_}
-        }
-
-        else {throw -ForegroundColor Red "Failed to connect to the commercial SPO Service with the following error:" $_}
-    }
+#Custom function to test spo connection status.
+Test-OcmsSpoConnection
 
 #Gather all sites within the tenant.
 $SiteIndex = Get-SPOSite -limit ALL
@@ -106,6 +98,5 @@ foreach ($Site in $SiteIndex)
 
 }
 
-#Export site owner data to a file.
 $SiteIndexData | Export-Csv ~/Desktop/$FileName.csv -Encoding utf8
-Write-Host -ForegroundColor Green "Successfully saved $FileName.csv to the Desktop!"
+
