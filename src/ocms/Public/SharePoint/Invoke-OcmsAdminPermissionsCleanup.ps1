@@ -5,34 +5,6 @@
 # Development Date: December 13, 2023
 #
 ####################################################################################################################################################################################
-
-#Operator risk acknowledgemenet initialization to ensure blank variable in case script is cancelled after running the first time, then run again.
-$OperatorAcknowledgement = " "
-
-#Print disclaimer to the screen for the operator.
-Write-Host -ForegroundColor DarkYellow "Disclaimer: This script is not officially supported or endorsed by Microsoft, its affiliates or partners"
-Write-Host -ForegroundColor DarkYellow "This script is provided as is and the responsibility of understanding the scripts functions and operations falls upon those that may choose to run it."
-Write-Host -ForegroundColor DarkYellow "Positive or negative outcomes of this script may not receive future assistance as such."
-Write-Host -ForegroundColor DarkYellow ""
-Write-Host -ForegroundColor DarkYellow "To acknowledge the above terms and proceed with running the script, please enter > Accept < (Case Sensitive)."
-
-#Get operator confirmation.
-$OperatorAcknowledgement = Read-Host "Acknowledgement"
-
-#Check operator confirmation. If confirmation does not equal "Accept", print message to screen and exit the script.
-if ($OperatorAcknowledgement -cne "Accept")
-{
-    Write-Host "Either the acknowledgement input does not match the word Accept or you have not agreed to accept the risk of running this script."
-    Start-Sleep -Seconds 1
-    Write-Host "The script will now exit. Have a nice day!"
-    Exit
-}
-
-Write-Host " "
-Write-Host -ForegroundColor Green "Acknowledgement accepted!"
-Write-Host " "
-
-####################################################################################################################################################################################
 #Get operator details.
 
 Write-Host "Now gathering variables required to run the script..."
