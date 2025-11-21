@@ -55,54 +55,22 @@ $Menu = Read-Host #Set variable for endpoint selection.
 
 #Convert user selection variable to the correct string.
 if ($Menu -eq 1)
-    {
-        $Endpoint = "com"
-    }
-
-    else
-    {
-        $Endpoint = "us"
-    }
-
-Write-Host -ForegroundColor Green "Now connecting to the SPO Service..." #Operator process information.
+    {$Endpoint = "com"}
+        else {$Endpoint = "us"}
 
 #Configure tenant admin center URL from user input.
 $SPOAdminCenterURL = "https://$TenantName-admin.sharepoint.$Endpoint"
 
 #Connect to the SPO service and try geo-location locks if required.
-try
-{
-#    Connect-SPOService -Url $SPOAdminCenterURL
-
-    Write-Host -ForegroundColor Green "Successfully connected to the SPO Service!" #Operator process information.
-}
-
-    catch
-    {
-        if($Endpoint -eq ".us")
-        {
-            try
-            {
-            Connect-SPOService -Url $SPOAdminCenterURL -Region ITAR
-
-            Write-Host -ForegroundColor Green "Successfully connected to the SPO Service under ITAR restrictions!" #Operator process information.
-            }
-
-                catch
-                {
-                   Write-Host -ForegroundColor Red "Failed to connect to the GCC-High SPO Service with the following error:" $_
-                   break; 
-                }
+try {Connect-SPOService -Url $SPOAdminCenterURL}
+    catch{
+        if($Endpoint -eq ".us") {
+            try {Connect-SPOService -Url $SPOAdminCenterURL -Region ITAR}
+                catch {Write-Error -ForegroundColor Red "Failed to connect to the GCC-High SPO Service with the following error:" $_}
         }
 
-        else
-        {
-            Write-Host -ForegroundColor Red "Failed to connect to the commercial SPO Service with the following error:" $_
-            break;
-        }
+        else {throw -ForegroundColor Red "Failed to connect to the commercial SPO Service with the following error:" $_}
     }
-
-Write-Host -ForegroundColor Green "Now gathering tenant site data" #Operator process information.
 
 #Gather all sites within the tenant.
 $SiteIndex = Get-SPOSite -limit ALL
@@ -122,10 +90,6 @@ foreach ($Site in $SiteIndex)
 {
     #Set Site title variable for default groups.
     $SiteTitle = $Site.Title
-
-    Write-Host "_______________________________________________"
-    Write-Host "Now processing Site: $SiteTitle"
-    Write-Host "_______________________________________________"
 
     #Get owners and add them to the site data index.
     $SiteOwners = Get-SPOUser -Site $Site.Url -Group "$SiteTitle Owners" #Gets all owners on the individual site.
