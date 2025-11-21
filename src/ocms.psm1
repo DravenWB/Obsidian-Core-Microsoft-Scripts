@@ -1,15 +1,23 @@
+#Dot sourcing order matters when functions rely on one-another.
+
 # Dot-source private functions
-Get-ChildItem -Path "$PSScriptRoot/Private" -Filter *.ps1 -Recurse | ForEach-Object {
-    . $_.FullName
-}
+. "$PSScriptRoot/Private/Connection.Tests.ps1"
+. "$PSScriptRoot/Private/PS.Version.Tests.ps1"
 
 # Dot-source public functions
-Get-ChildItem -Path "$PSScriptRoot/Public" -Filter *.ps1 -Recurse | ForEach-Object {
-    . $_.FullName
-}
+. "$PSScriptRoot/Public/SharePoint.Connections.ps1"
+. "$PSScriptRoot/Public/Core.Settings.ps1"
+. "$PSScriptRoot/Public/Identity.Licenses.ps1"
+. "$PSScriptRoot/Public/Purview.Labels.ps1"
 
-# Export public functions only
-$public = Get-ChildItem -Path "$PSScriptRoot/Public" -Filter *.ps1 |
-          Select-Object -ExpandProperty BaseName
+Export-ModuleMember -Function `
+    'Connect-OcmsSPO',
+    'Connect-OcmsPnPOnline',
+    'Initialize-OcmsProfile',
+    'Get-OcmsSetting',
+    'Invoke-OcmsLicenseMigration',
+    'Get-OcmsSensitivityLabelPolicy',
+    'Export-OcmsSensitivityLabelPolicyReport',
+    'Reset-OcmsSpoLibraryInheritance',
+    'Get-OcmsSiteOwnerReport'
 
-Export-ModuleMember -Function $public
