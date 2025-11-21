@@ -10,31 +10,10 @@
 # installation status at the start.
 ###################################################################################################################
 
-#Check for module installation and correct versioning. If PowerShell version is less than version 7, inform the operator and exit.
-Write-Host -ForegroundColor Green "Now checking installed dependencies to ensure they are available and are of the correct version..."
-Start-Sleep -Seconds 1
-
-Write-Host -ForegroundColor Green "Now checking installed PowerShell Version..."
-Start-Sleep -Seconds 1
-
-if ([string] $PSVersionTable.PSVersion -lt "7")
-    {
-        Write-Host -ForegroundColor Red "Your PowerShell instance is currently running version:" $PSVersionTable.PSVersion
-        Write-Host -ForegroundColor Red "To run this script, please run in or install PowerShell version 7 or greater."
-        Start-Sleep -Seconds 3
-        Write-Host "Have a great day! :)"
-        Exit
-    }
-
-    else
-        {
-            Write-Host -ForegroundColor Green "PowerShell v7+ already installed!"
-        }
+Test-OcmsPSVersion -Version 7
 
 #Check for installed .net version and exit if version is found to be below version 4.8.
 #Version not printed to user as the internal version is not listed as 4.8 (ex.) and is instead listed as a number like "533320" which isn't the most readable.
-Write-Host -ForegroundColor Green "Now checking installed .net version..."
-Start-Sleep -Seconds 1
 
 [string] $DotNetVersion = Get-ItemPropertyValue -LiteralPath 'HKLM:SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full' -Name Release
 if ($DotNetVersion -lt "533320")
@@ -45,41 +24,12 @@ if ($DotNetVersion -lt "533320")
         Write-Host "Have a great day! :)"
         Exit
     }
-
-    else
-        {
-            Write-Host -ForegroundColor Green "Your .Net version is up to date!"
-        }
+        else {continue}
 
 #Check for installed PnP.PowerShell version and install if missing.
-Write-Host -ForegroundColor Green "Now checking installed PnP.PowerShell Version..."
-Start-Sleep -Seconds 1
+Write-Verbose -ForegroundColor Green "Now checking installed PnP.PowerShell Version..."
 
-if (-not(Get-Module -ListAvailable -Name "PnP.PowerShell"))
-    {
-        try
-            {
-                Write-Host -ForegroundColor DarkYellow "PnP.PowerShell not found. Now proceeding with installation for the current user only..."
-                Install-Module -Name "PnP.PowerShell" -Scope CurrentUser
-            }
-
-            catch
-                {
-                    Write-Host -ForegroundColor Red "There was an error installing PnP.Powershell: $_"
-                    Exit
-                }
-    }
-
-    else
-        {
-            Write-Host -ForegroundColor Green "PnP.PowerShell found!"
-        }
-
-#Update the operator.
-Write-Host -ForegroundColor Green "Dependency check complete!"
-Start-Sleep -Seconds 1
-
-#Get variables from the operator.
+Test-OcmsPnPInstall
 
 #Get the site to generate items for.
 Write-Host "Please enter the full site URL you would like to generate items for:"
@@ -103,15 +53,8 @@ Write-Host "This will generate items such as Test Item 1, Test Item 2, Test Item
 $ItemName = Read-Host "Name"
 
 #Connect to the site via PnP.
-try
-    {
-        Connect-PnPOnline -Url $SiteURL -UseWebLogin
-    }
-
-    catch
-        {
-            Write-Host -ForegroundColor Red "There was an error connecting to SharePoint via PnP PowerShell: $_"
-        }
+try {Connect-PnPOnline -Url $SiteURL -UseWebLogin}
+    catch {throw "There was an error connecting to SharePoint via PnP PowerShell: $_"}
 
 #Ask the user for what point they'd like to start the generation at:
 Write-Host "What number would you like to start generating list items at? (Recommended: 1)"
@@ -126,18 +69,11 @@ Write-Host "Starting Count:" $Counter
 Write-Host "To confirm this operation, please type the word > Accept < (Case Sensitive)."
 $Validation = Read-Host "Confirmation"
 
-if ($Validation -ceq "Accept")
-    {
-        #Loop to generate items.
-        do
-        {
-            Add-PnPListItem -List $ListName -Values @{"Title" = "$ItemName $Counter"}
-            $Counter++
-        }
-
-        #Argument determining how long the loop should run.
-        while ($Counter -le $ItemCount)
+if ($Validation -ceq "Accept") {
+    #Loop to generate items.
+    do {
+        Add-PnPListItem -List $ListName -Values @{"Title" = "$ItemName $Counter"}
+        $Counter++
     }
-
-Write-Host -ForegroundColor Green "Item generation complete!"
-Write-Host -ForegroundColor Green "Have a nice day!"
+        while ($Counter -le $ItemCount)
+}
