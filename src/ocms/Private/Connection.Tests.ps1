@@ -9,11 +9,7 @@ function Test-OcmsSpoConnection {
         catch {$connected = $false}
 
     if ($connected) { return }
-
-        else {
-            Write-Host -ForegroundColor Yellow "You are not connected to the SharePoint Online Service."
-            Write-Host "Please run Connect-OcmsSPO to continue."
-        }
+        else {throw "You are not connected to the SharePoint Online Service. Please run Connect-OcmsSPO to continue."}
 }
 
 function Test-OcmsPnPConnection {
@@ -23,14 +19,8 @@ function Test-OcmsPnPConnection {
     try {
         $connection = Get-PnPConnection -ErrorAction Stop
 
-        if ($null -ne $connection -and $connection.ConnectionType -ne 'None') {
-            return $true
-        }
-        else {
-            return $false
-        }
+        if ($null -ne $connection -and $connection.ConnectionType -ne 'None') {return $true}
+            else {return $false}
     }
-    catch {
-        return $false
-    }
+    catch {return $false}
 }
