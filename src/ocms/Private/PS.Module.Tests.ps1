@@ -1,5 +1,5 @@
 
-function Test-PSVersion {
+function Test-OcmsPSVersion {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
@@ -23,7 +23,7 @@ if ($InstalledVersion -ge '$Version') {
     }
 }
 
-function Test-PnPVersion {
+function Test-OcmsPnPInstall {
     [CmdletBinding()]
     param ()
 

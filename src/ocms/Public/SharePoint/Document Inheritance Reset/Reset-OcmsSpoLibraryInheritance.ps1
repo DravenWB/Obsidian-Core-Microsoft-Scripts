@@ -11,19 +11,8 @@
 # is not liable for any damages or resulting issues.
 ###################################################################################################################
 
-#Get dependent function modules.
-. .\Dependencies\Operator_Acknowledgement.ps1
-. .\Dependencies\PS7_Dependency_Check.ps1
-
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
-# Initial Operations.
-Write-Host ""
-Operator_Acknowledgement_Check #Confirm user acknowledgement of operating script.
-Write-Host ""
-PS7_Version_Check #Check the version of PowerShell 7 and ensure it is the current version running.
-Write-Host ""
-PnP_Installation_Check #Check if PnP.PowerShell is installed.
+Test-OcmsPSVersion -Version 7
+Test-OcmsPnPInstall
 
 ####################################################################################################################################################################################
 
@@ -229,7 +218,7 @@ $ProcessingDate = Get-Date -Format "MM/dd/yyyy" #Pre-assigned to get date once i
 ####################################################################################################################################################################################
 #Process changes.
 
-$ProcessingIndex = Get-PnPListItem -List $ListName -PageSize 500 | Where {$_.FileSystemObjectType -eq "File" -or $_.FileSystemObjectType -eq "Folder"}
+$ProcessingIndex = Get-PnPListItem -List $ListName -PageSize 500 | Where-Object {$_.FileSystemObjectType -eq "File" -or $_.FileSystemObjectType -eq "Folder"}
 
 foreach ($ProcessingItem in $ProcessingIndex) 
     {
