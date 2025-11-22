@@ -21,31 +21,11 @@ $LicenseChangeIndex = @() #Array to store data. Do not change.
 $ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop
 #####################
 
-Write-Host ""
-Write-Host -ForegroundColor Green "Now checking installed Microsoft Graph PowerShell Module."
-Write-Host ""
+Write-Verbose -ForegroundColor Green "Now checking installed Microsoft Graph PowerShell Module."
 
-Start-Sleep -Seconds 1 #Gives operator a moment to read message.
+Test-OcmsPnPInstall
 
-    if(-not (Get-Module Microsoft.Graph -ListAvailable)) #Check for and install Microsoft Graph module if not installed.
-    {
-        Write-Host -ForegroundColor DarkYellow "Microsoft Graph (Microsoft.Graph) module not found. Now installing..."
-        Start-Sleep -Seconds 1 #Gives operator a moment to read message.
-
-        try
-        {
-            Install-Module Microsoft.Graph -Scope CurrentUser -Force
-        }
-            catch
-            {
-                Write-Host -ForegroundColor Red "There was an error installing the Microsoft.Graph Commandlet: $_"
-                exit
-            }
-
-    }
-
-Write-Host -ForegroundColor Green "Module check complete!"
-Start-Sleep -Seconds 1 #Gives operator a moment to read message.
+Write-Verbose -ForegroundColor Green "Module check complete!"
 
 #Determine user's environment
 Write-Host "Please select the tenant type for licenses being modified:"
@@ -67,9 +47,7 @@ Start-Sleep -Seconds 1
 
 if ($TenantType -like "Commercial") #Connect to the graph API for license modification.
     {Connect-MgGraph -Scopes User.ReadWrite.All, Organization.Read.All -NoWelcome} #Connects to the commercial graph service.
-
-    else 
-    {Connect-MGgraph -Scopes User.ReadWrite.All, Organization.Read.All -Environment USGov -NoWelcome} #Connects to the GCC-High graph service.
+        else {Connect-MGgraph -Scopes User.ReadWrite.All, Organization.Read.All -Environment USGov -NoWelcome} #Connects to the GCC-High graph service.
 
  #Define object oriented object variables for data storage.
     class LicenseChangeMatrix
@@ -106,8 +84,7 @@ do
             Write-Host -ForegroundColor DarkYellow "To make changes, please confirm by typing the word > Execute < (Case Sensitive):"
             $Confirmation = Read-Host "Confirmation:"
 
-            If($Confirmation -ceq "Execute")
-            {
+            If($Confirmation -ceq "Execute") {
                 #Cycle through users storing users with licensing in variable
                 foreach ($User in $Users)
                 {
@@ -118,14 +95,8 @@ do
 
                         $XError = " "
 
-                        try
-                        {
-                        #Remove old license and add new license.
-                        Set-MgUserLicense -UserId "$Upn" -AddLicenses @{SkuId = $AddLicenseSku.SkuId} -RemoveLicenses @($RemoveLicenseSku.SkuId)
-                        }
-
-                            catch #If removal of license fails.
-                            {
+                        try {Set-MgUserLicense -UserId "$Upn" -AddLicenses @{SkuId = $AddLicenseSku.SkuId} -RemoveLicenses @($RemoveLicenseSku.SkuId)}
+                            catch {
                                 #Assign error to variable for both host output and storage to csv file.
                                 $XError = "Couldn't replace $Upn's $LicenseToRemove with $LicenseToAdd"
                                 Write-Host -ForeGroundColor Red $XError #Print the error to the screen.
@@ -133,13 +104,12 @@ do
 
                         #Apply change data to object.
                         $Object = New-Object PSObject -Property $([ordered]@{
-                    
-                        Date = Get-Date -Format "MM/dd/yyyy"
-                        Time = Get-Date -Format "HH:mm"
-                        UserUPN = $Upn
-                        OriginalLicense = $LicenseToRemove
-                        NewLicense = $LicenseToAdd
-                        Errors = $XError
+                            Date = Get-Date -Format "MM/dd/yyyy"
+                            Time = Get-Date -Format "HH:mm"
+                            UserUPN = $Upn
+                            OriginalLicense = $LicenseToRemove
+                            NewLicense = $LicenseToAdd
+                            Errors = $XError
                         })
 
                         $LicenseChangeIndex += $Object #Send object to global index.
@@ -151,34 +121,21 @@ do
             }
 
                 else #If confirmation fails. Operator must enter the word "Execute" precisely.
-                {
-                    Write-Host -ForegroundColor Red "Confirmation failed. Please try again."
-                    Start-Sleep -Seconds 2
-                }
+                {Write-Error -ForegroundColor Red "Confirmation failed. Please try again."}
         }
 
         '2'
         {
-            #Combine path and filename for creation.
-            try
-            {
-            #Export all items to a CSV file.
-            $LicenseChangeIndex | Export-Csv -Path $SavePathAndName -NoClobber
-            }
+            try {$LicenseChangeIndex | Export-Csv -Path $SavePathAndName -NoClobber}
                 catch
-                {
-                    Write-Host -ForegroundColor Red "There was an error outputting the gathered data to CSV. Attempting again with modifier..."
-
+                {Write-Host -ForegroundColor Red "There was an error outputting the gathered data to CSV. Attempting again with modifier..."
                     try
                     {
                         $TimeModifier = Get-Time "MM/dd/yyy - HH:mm"
                         $SavePathAndName = $SavePathAndName + $TimeModifier
                         $LicenseChangeIndex | Export-Csv -Path $SavePathAndName -NoClobber
                     }
-                        catch
-                        {
-                            Write-Host -ForegroundColor Red "Failed to save file with modifer due to error: $_"
-                        }
+                        catch {Write-Error -ForegroundColor Red "Failed to save file with modifer due to error: $_"}
                 }
         }
     }
