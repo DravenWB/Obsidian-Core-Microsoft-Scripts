@@ -46,20 +46,13 @@ if ($ListName.StartsWith('"') -or $ListName.EndsWith('"'))
 #Connect to PnP Online and exit if it fails. If succeeds, get the context and proceed.
 Write-Host ""
 try {Connect-PnPOnline -Url $SiteURL -UseWebLogin}
-
-    catch 
-        {
-            Write-Host -ForegroundColor Red "There was an error connecting to PnP Online: $_"
-            Exit
-        }
+    catch {throw "There was an error connecting to PnP Online: $_"}
 
 #Get the context.
 $Context = Get-PnPContext
 
 ####################################################################################################################################################################################
 $ExitSwitch = $null #Initialization of property to control exit parameter.
-
-Write-Host "" #Spacer to keep details readable.
 
 do
     {
@@ -71,41 +64,30 @@ do
         Write-Host "4. Continue with current configuration."
         Write-Host "5. Skip operational logging."
 
-        Write-Host "" #Spacer to keep details readable.
-
         $LoggingConfig = Read-Host "Selection"
 
         switch($LoggingConfig)
             {            
                 '1'
                 {
-                    #Get file save name.
                     Write-Host "Enter a filename:"
                     $LoggingFileName = Read-Host "Log Name"
-                    Write-Host "" #Spacer to keep details readable.
 
-                    #Get file save path.
                     Write-Host "Enter a save path:"
                     Write-Host "Note: Recommend separate, dedicated directory."
                     Write-Host "Note: If any spaces are in the path, start and finish the entry with quotation marks."
                     $LoggingPath = Read-Host "Path"
-                    Write-Host "" #Spacer to keep details readable.
+
 
                         #Ensure that the logging path has a / at the end.
-                        if (-not $LoggingPath.EndsWith('/'))
-                            {
-                                $LoggingPath += '/'
-                            }
+                        if (-not $LoggingPath.EndsWith('/')) {$LoggingPath += '/'}
 
                     #Get total number of items to process.
                     Write-Host "How many items would you like to save per .csv file?"
                     Write-Host "Recommended: No more than 10,000 items."
                     Write-Host "Input should be a number"
-                    Write-Host "" #Spacer to keep details readable.
 
                     [int]$LoggingCount = Read-Host "Amount"
-
-                    Write-Host "" #Spacer to keep details readable.
                 }
             
                 '2'
@@ -114,9 +96,6 @@ do
                     Write-Host "Save Directory: $LoggingPath"
                     Write-Host "Log entries per file: $LoggingCount"
 
-                    Write-Host "" #Spacer to keep details readable.
-
-                    #Prompt operator to press a key to continue.
                     Write-Host "Press Enter to continue ..."
                     $null = Read-Host
                 }
@@ -128,7 +107,6 @@ do
                     $LoggingCount = $null
 
                     Write-Host -ForegroundColor Green "Logging parameters cleared!"
-                    Write-Host "" #Spacer to keep details readable.
                 }
             
                 '4'
@@ -136,8 +114,6 @@ do
                     Write-Host -ForegroundColor Green "Now continuing with current logging configuration..."
                     Start-Sleep -Seconds 2
                     $Exit = "Exit"
-
-                    Write-Host "" #Spacer to keep details readable.
                 }
             
                 '5'
@@ -148,10 +124,7 @@ do
                     $LoggingPath = $null
                     $LoggingCount = $null
 
-                    Start-Sleep -Seconds 1
                     $Exit = "Exit"
-
-                    Write-Host "" #Spacer to keep details readable.
                 }
             }
     }
@@ -185,14 +158,11 @@ do
             {
                 $QueryItems = Get-PnPListItem -List $ListName | Measure-Object | Select-Object -ExpandProperty Count
 
-                # Output the number of items returned
                 Write-Host "Number of items:" $QueryItems
             }
         
             '3'
-            {
-                Exit
-            }
+            {Exit}
         }
 }
 
