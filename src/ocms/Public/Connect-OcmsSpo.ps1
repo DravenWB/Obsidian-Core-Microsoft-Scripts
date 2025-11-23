@@ -1,14 +1,22 @@
-function Connect-OcmsSPO {
+function Connect-OcmsService {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
+        [ValidateCount(1)]
+        [ValidateSet("SharePoint", "Graph", "PnP", IgnoreCase = $False)]
+        [string]$Service,
+
+        [Parameter(Mandatory)]
+        [ValidateCount(1)]
         [string]$TenantDomain,
 
-        [Parameter]
+        [Parameter()]
+        [ValidateCount(1)]
         [ValidateSet('Commercial', 'GCCH', 'Germany', 'China')]
         [string]$Environment,
 
-        [Parameter]
+        [Parameter()]
+        [ValidateCount(1)]
         [string]$AdminUPN
     )
 
@@ -23,12 +31,32 @@ function Connect-OcmsSPO {
             default {throw "Unknown Environment: $Environment"}
         }
 
-    try {Connect-SPOService -Url "https://$TenantDomain-admin.sharepoint.$TenantSuffix" -Region $TenantRegion}
-        catch {
-            try {
-                Write-Error: "There were errors connecting to the $Environment SPO Service: $_"
-                Connect-SPOService -Url "https://$TenantDomain-admin.sharepoint.$TenantSuffix" -Credential $AdminUPN -Region $TenantRegion -UseSystemBrowser $true
-            }
-            catch {throw "There were errors connecting to the $Environment SPO Service: $_"}
+    switch ($Service) {
+        'SharePoint' {
+            try {Connect-SPOService -Url "https://$TenantDomain-admin.sharepoint.$TenantSuffix" -Region $TenantRegion}
+                catch {
+                    try {Connect-SPOService -Url "https://$TenantDomain-admin.sharepoint.$TenantSuffix" -Credential $AdminUPN -Region $TenantRegion -UseSystemBrowser $true}
+                        catch {throw "There were errors connecting to the $Environment $Service Service: $_"}
+                }
         }
+
+        'Graph' {
+            if ($Environment -eq "Commercial") {
+                    try {Connect-MgGraph -Scopes User.ReadWrite.All, Organization.Read.All -NoWelcome}
+                        catch {throw "There were errors connecting to the $Environment $Service Service: $_"}
+                }
+                    else {
+                        try {Connect-MGgraph -Scopes User.ReadWrite.All, Organization.Read.All -Environment USGov -NoWelcome}
+                            catch {throw "There were errors connecting to the $Environment $Service Service: $_"}
+                    }
+        }
+
+        'PnP' {
+            try {Connect-PnPOnline -Url "https://$TenantDomain-admin.sharepoint.$TenantSuffix" -Interactive}
+                catch {
+                    try {Connect-PnPOnline -Url "https://$TenantDomain-admin.sharepoint.$TenantSuffix" -OSLogin}
+                        catch {throw "There were errors connecting to the $Environment $Service Service: $_"}
+                }
+        }
+    }
 }
