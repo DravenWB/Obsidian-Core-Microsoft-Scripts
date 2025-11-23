@@ -1,26 +1,54 @@
-function Test-OcmsSpoConnection {
+Test-OcmsConnection {
     [CmdletBinding()]
-    param()
+    param (
+        [ValidateCount(1)]
+        [ValidateSet("SharePoint", "Graph", "PnP")]
+        [Parameter(Mandatory)]
+        [String]$Service
+    )
 
-    try {
-        Get-SPOTenant -ErrorAction Stop | Out-Null
-        $connected = $true
+    switch($Service) {
+        'SharePoint' {
+            try {
+                Get-SPOTenant -ErrorAction Stop | Out-Null
+
+                Write-Verbose "$Service confirmed connected."
+
+                return $true
+            }
+                catch {
+                    Write-Verbose "$Service disconnected. Please connect using Connect-OcmsService."
+                    return $false
+                }
+        }
+
+        'Graph' {
+            $MGConnection = $null
+
+            try {
+                Get-MgEnvironment Name AzureADEndpoint GraphEndpoint Type | Out-Null
+
+                Write-Verbose "$Service confirmed connected."
+
+                return $true
+            }
+                catch {
+                    Write-Verbose "$Service disconnected. Please connect using Connect-OcmsService."
+                    return $false
+                }
+        }
+        'PnP' {
+            try {
+                Get-PnPConnection -ErrorAction Stop | Out-Null
+
+                Write-Verbose "$Service confirmed connected."
+
+                return $true
+            }
+                catch {
+                    Write-Verbose "$Service disconnected. Please connect using Connect-OcmsService."
+                    return $false
+                }
+        }
     }
-        catch {$connected = $false}
-
-    if ($connected) { return }
-        else {throw "You are not connected to the SharePoint Online Service. Please run Connect-OcmsSPO to continue."}
-}
-
-function Test-OcmsPnPConnection {
-    [CmdletBinding()]
-    param()
-
-    try {
-        $connection = Get-PnPConnection -ErrorAction Stop
-
-        if ($null -ne $connection -and $connection.ConnectionType -ne 'None') {return $true}
-            else {return $false}
-    }
-    catch {return $false}
 }
