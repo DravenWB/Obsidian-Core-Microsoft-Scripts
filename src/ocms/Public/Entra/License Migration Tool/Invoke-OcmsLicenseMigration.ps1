@@ -1,57 +1,26 @@
-##############################################################################
-# - Script Definition: This script is designed to change the licenses of a
-#   large amount of users as defined by the operator and then output all
-#   changes to a CSV file to include users that received an error during license
-#   change oeration.
-#
-# - Disclaimer: This script is not officially supported by Microsoft, its
-#   affiliates or partners. This script is provided as is and the responsibility
-#   of understanding the scripts, functions, and operations falls upon those that
-#   may choose to run it. Responsibility of positive or negative outcomes of
-#   this script may not receive future assistance as such.
-##############################################################################
+function Invoke-OcmsLicenseMigration {
+    [CmdletBinding(SupportsShouldProcess=$true)]
+    param (
+        [Parameter(Mandatory)]
+        [string]$LicenseToAdd,
 
-$LicenseToAdd = "ENTERPRISEPACK_USGOV_GCCHIGH"  #Variable that sets Office 365 E3 License for assignemnt.
-$LicenseToRemove = "STANDARDPACK_USGOV_GCCHIGH"  #Variable that removes Office 365 E1 License.
-$SavePathAndName = "~\Desktop\Tenant_License_Migration_Report.csv"
-$LicenseChangeIndex = @() #Array to store data. Do not change.
+        [Parameter(Mandatory)]
+        [string]$LicenseToRemove,
 
-### DO NOT CHANGE ###
-#Set error action type to make error catching work.
-$ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop
-#####################
+        [Parameter(Mandatory)]
+        [string]$LogPath
+    )
 
-Write-Verbose -ForegroundColor Green "Now checking installed Microsoft Graph PowerShell Module."
+    # Validate environment
+    Test-OcmsPSVersion -Version 7 -ThrowOnFail $true
+    Test-OcmsModuleInstallation -Module PnP
+    Test-OcmsConnection -Service "PnP"
+    Test-OcmsConnectoin -Service "Graph"
 
-Test-OcmsPnPInstall
+    $LicenseChangeIndex = @()
 
-Write-Verbose -ForegroundColor Green "Module check complete!"
-
-#Determine user's environment
-Write-Host "Please select the tenant type for licenses being modified:"
-Write-Host "1. Commercial (.com)"
-Write-Host "2. GCC-High (.us)"
-
-$TenantSelection = Read-Host "Selection:" #Get the user tenant selection.
-
-switch($TenantSelection) #Assign user selection for later use.
-{
-    '1' {$TenantType = "Commercial"}
-    '2' {$TenantType = "GCCH"}
-}
-
-#Connect to Graph services.
-Write-Host -ForegroundColor Green "Now connecting to Graph services."
-
-Start-Sleep -Seconds 1
-
-if ($TenantType -like "Commercial") #Connect to the graph API for license modification.
-    {Connect-MgGraph -Scopes User.ReadWrite.All, Organization.Read.All -NoWelcome} #Connects to the commercial graph service.
-        else {Connect-MGgraph -Scopes User.ReadWrite.All, Organization.Read.All -Environment USGov -NoWelcome} #Connects to the GCC-High graph service.
-
- #Define object oriented object variables for data storage.
-    class LicenseChangeMatrix
-    {
+    # Object for logging
+    class LicenseChangeMatrix {
         [string] ${Date}
         [string] ${Time}
         [string] ${UserUPN}
@@ -60,86 +29,51 @@ if ($TenantType -like "Commercial") #Connect to the graph API for license modifi
         [string] ${Errors}
     }
 
-#Convert license type to sku number
-$RemoveLicenseSku = Get-MgSubscribedSku -All | Where SkuPartNumber -eq "$LicenseToRemove"
-$AddLicenseSku = Get-MgSubscribedSku -All | Where SkuPartNumber -eq "$LicenseToAdd"
+    # Resolve SKU IDs
+    $RemoveLicenseSku = Get-MgSubscribedSku -All | Where-Object SkuPartNumber -eq $LicenseToRemove
+    $AddLicenseSku    = Get-MgSubscribedSku -All | Where-Object SkuPartNumber -eq $LicenseToAdd
 
-#Call users with selected license for removal and store in variable.
-$Users = Get-MgUser -Filter "assignedLicenses/any(x:x/skuId eq $($RemoveLicenseSku.SkuId) )" -ConsistencyLevel eventual -All
+    # Get users with the license to remove
+    $Users = Get-MgUser -Filter "assignedLicenses/any(x:x/skuId eq $($RemoveLicenseSku.SkuId))" -ConsistencyLevel eventual -All
 
-do
-{
-    Write-Host "Please select an option:"
-    Write-Host "1. Execute license migration changes."
-    Write-Host "2. Write license changes to file."
-    Write-Host "3. Exit."
-    
-    $MainMenu = Read-Host "Selection"
+    Write-Host -ForegroundColor Cyan "Found $($Users.Count) users with $LicenseToRemove."
 
-    switch($MainMenu)
-    {
-        '1'
-        {
-            Write-Host -ForegroundColor DarkYellow "The following amount of changes are about to be made:" $Users.count
-            Write-Host -ForegroundColor DarkYellow "To make changes, please confirm by typing the word > Execute < (Case Sensitive):"
-            $Confirmation = Read-Host "Confirmation:"
+    foreach ($User in $Users) {
+        $Upn = $User.UserPrincipalName
+        $XError = " "
 
-            If($Confirmation -ceq "Execute") {
-                #Cycle through users storing users with licensing in variable
-                foreach ($User in $Users)
-                {
-                    $Upn = $User.UserPrincipalName
-
-                        #Write user converting from license to license
-                        Write-Host -ForegroundColor Green "User $Upn will go from $LicenseToRemove to $LicenseToAdd"
-
-                        $XError = " "
-
-                        try {Set-MgUserLicense -UserId "$Upn" -AddLicenses @{SkuId = $AddLicenseSku.SkuId} -RemoveLicenses @($RemoveLicenseSku.SkuId)}
-                            catch {
-                                #Assign error to variable for both host output and storage to csv file.
-                                $XError = "Couldn't replace $Upn's $LicenseToRemove with $LicenseToAdd"
-                                Write-Host -ForeGroundColor Red $XError #Print the error to the screen.
-                            }
-
-                        #Apply change data to object.
-                        $Object = New-Object PSObject -Property $([ordered]@{
-                            Date = Get-Date -Format "MM/dd/yyyy"
-                            Time = Get-Date -Format "HH:mm"
-                            UserUPN = $Upn
-                            OriginalLicense = $LicenseToRemove
-                            NewLicense = $LicenseToAdd
-                            Errors = $XError
-                        })
-
-                        $LicenseChangeIndex += $Object #Send object to global index.
-
-                        $XError = $null #Clear error variable to ensure error is not duplicated on next object.
-                        $Oject = $null #Clear error variable to ensure error is not duplicated on next object.
-                        Write-Host "" #Spacer
-                }
+        if ($PSCmdlet.ShouldProcess("User $Upn", "Replace $LicenseToRemove with $LicenseToAdd")) {
+            try {
+                Set-MgUserLicense -UserId $Upn -AddLicenses @{SkuId = $AddLicenseSku.SkuId} -RemoveLicenses @($RemoveLicenseSku.SkuId)
+                Write-Host -ForegroundColor Green "Updated $Upn from $LicenseToRemove to $LicenseToAdd"
+            } catch {
+                $XError = "Couldn't replace $Upn's $LicenseToRemove with $LicenseToAdd"
+                Write-Host -ForegroundColor Red $XError
             }
-
-                else #If confirmation fails. Operator must enter the word "Execute" precisely.
-                {Write-Error -ForegroundColor Red "Confirmation failed. Please try again."}
+        } else {
+            Write-Host -ForegroundColor Yellow "WhatIf: $Upn would have been updated from $LicenseToRemove to $LicenseToAdd"
         }
 
-        '2'
-        {
-            try {$LicenseChangeIndex | Export-Csv -Path $SavePathAndName -NoClobber}
-                catch
-                {Write-Host -ForegroundColor Red "There was an error outputting the gathered data to CSV. Attempting again with modifier..."
-                    try
-                    {
-                        $TimeModifier = Get-Time "MM/dd/yyy - HH:mm"
-                        $SavePathAndName = $SavePathAndName + $TimeModifier
-                        $LicenseChangeIndex | Export-Csv -Path $SavePathAndName -NoClobber
-                    }
-                        catch {Write-Error -ForegroundColor Red "Failed to save file with modifer due to error: $_"}
-                }
+        # Log each change/error
+        $Object = [LicenseChangeMatrix]@{
+            Date           = Get-Date -Format "MM/dd/yyyy"
+            Time           = Get-Date -Format "HH:mm"
+            UserUPN        = $Upn
+            OriginalLicense = $LicenseToRemove
+            NewLicense      = $LicenseToAdd
+            Errors         = $XError
         }
+
+        $LicenseChangeIndex += $Object
     }
-}
-until($MainMenu -eq '3')
 
-Write-Host -ForegroundColor Green "All operations complete!"
+    # Export log
+    try {
+        $LicenseChangeIndex | Export-Csv -Path $LogPath -NoClobber -Force
+        Write-Host -ForegroundColor Green "Log exported to $LogPath"
+    } catch {
+        Write-Host -ForegroundColor Red "Failed to save CSV: $_"
+    }
+
+    Write-Host -ForegroundColor Green "All operations complete!"
+}
