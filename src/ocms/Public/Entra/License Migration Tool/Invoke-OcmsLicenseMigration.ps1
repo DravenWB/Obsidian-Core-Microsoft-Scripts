@@ -7,19 +7,17 @@ function Invoke-OcmsLicenseMigration {
         [Parameter(Mandatory)]
         [string]$LicenseToRemove,
 
-        [Parameter(Mandatory)]
-        [string]$LogPath
+        [Parameter()]
+        [string]$LogPath = (Join-Path $env:USERPROFILE "Desktop\LicenseMigrationLog.csv")
     )
 
     # Validate environment
-    Test-OcmsPSVersion -Version 7 -ThrowOnFail $true
-    Test-OcmsModuleInstallation -Module PnP
+    Test-OcmsModule -Module PowerShell -Version 7 -ThrowOnFail $true
+    Test-OcmsModule -Module PnP
     Test-OcmsConnection -Service "PnP"
     Test-OcmsConnectoin -Service "Graph"
 
-    $LicenseChangeIndex = @()
-
-    # Object for logging
+    # Define logging class
     class LicenseChangeMatrix {
         [string] ${Date}
         [string] ${Time}
@@ -27,7 +25,20 @@ function Invoke-OcmsLicenseMigration {
         [string] ${OriginalLicense}
         [string] ${NewLicense}
         [string] ${Errors}
+
+        LicenseChangeMatrix([string]$Date, [string]$Time, [string]$UserUPN,
+                            [string]$OriginalLicense, [string]$NewLicense, [string]$Errors) {
+            $this.Date = $Date
+            $this.Time = $Time
+            $this.UserUPN = $UserUPN
+            $this.OriginalLicense = $OriginalLicense
+            $this.NewLicense = $NewLicense
+            $this.Errors = $Errors
+        }
     }
+
+    # Use List for efficiency
+    $LicenseChangeIndex = [System.Collections.Generic.List[LicenseChangeMatrix]]::new()
 
     # Resolve SKU IDs
     $RemoveLicenseSku = Get-MgSubscribedSku -All | Where-Object SkuPartNumber -eq $LicenseToRemove
@@ -36,44 +47,42 @@ function Invoke-OcmsLicenseMigration {
     # Get users with the license to remove
     $Users = Get-MgUser -Filter "assignedLicenses/any(x:x/skuId eq $($RemoveLicenseSku.SkuId))" -ConsistencyLevel eventual -All
 
-    Write-Host -ForegroundColor Cyan "Found $($Users.Count) users with $LicenseToRemove."
+    Write-Verbose -ForegroundColor Cyan "Found $($Users.Count) users with $LicenseToRemove."
 
     foreach ($User in $Users) {
         $Upn = $User.UserPrincipalName
-        $XError = " "
+        $XError = ""  # Initialize per iteration
 
         if ($PSCmdlet.ShouldProcess("User $Upn", "Replace $LicenseToRemove with $LicenseToAdd")) {
             try {
                 Set-MgUserLicense -UserId $Upn -AddLicenses @{SkuId = $AddLicenseSku.SkuId} -RemoveLicenses @($RemoveLicenseSku.SkuId)
-                Write-Host -ForegroundColor Green "Updated $Upn from $LicenseToRemove to $LicenseToAdd"
+                Write-Verbose -ForegroundColor Green "Updated $Upn from $LicenseToRemove to $LicenseToAdd"
             } catch {
                 $XError = "Couldn't replace $Upn's $LicenseToRemove with $LicenseToAdd"
-                Write-Host -ForegroundColor Red $XError
+                Write-Error -ForegroundColor Red $XError
             }
         } else {
             Write-Host -ForegroundColor Yellow "WhatIf: $Upn would have been updated from $LicenseToRemove to $LicenseToAdd"
         }
 
-        # Log each change/error
-        $Object = [LicenseChangeMatrix]@{
-            Date           = Get-Date -Format "MM/dd/yyyy"
-            Time           = Get-Date -Format "HH:mm"
-            UserUPN        = $Upn
-            OriginalLicense = $LicenseToRemove
-            NewLicense      = $LicenseToAdd
-            Errors         = $XError
-        }
-
-        $LicenseChangeIndex += $Object
+        # Create and add object to the list
+        $Object = [LicenseChangeMatrix]::new(
+            (Get-Date -Format "MM/dd/yyyy"),
+            (Get-Date -Format "HH:mm"),
+            $Upn,
+            $LicenseToRemove,
+            $LicenseToAdd,
+            $XError
+        )
+        $LicenseChangeIndex.Add($Object)
     }
 
     # Export log
     try {
         $LicenseChangeIndex | Export-Csv -Path $LogPath -NoClobber -Force
-        Write-Host -ForegroundColor Green "Log exported to $LogPath"
+        Write-Verbose -ForegroundColor Green "Log exported to $LogPath"
     } catch {
-        Write-Host -ForegroundColor Red "Failed to save CSV: $_"
+        Write-Error -ForegroundColor Red "Failed to save CSV: $_"
     }
-
     Write-Host -ForegroundColor Green "All operations complete!"
 }
