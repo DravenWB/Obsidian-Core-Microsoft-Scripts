@@ -2,7 +2,7 @@ Test-OcmsConnection {
     [CmdletBinding()]
     param (
         [ValidateCount(1)]
-        [ValidateSet("SharePoint", "Graph", "PnP")]
+        [ValidateSet("SharePoint", "Exchange", "IPPS", "Graph", "PnP")]
         [Parameter(Mandatory)]
         [String]$Service,
 
@@ -15,6 +15,30 @@ Test-OcmsConnection {
         'SharePoint' {
             try {
                 Get-SPOTenant -ErrorAction Stop | Out-Null
+                Write-Verbose "$Service confirmed connected."
+                return $true
+            }
+            catch {
+                if ($ThrowOnFail) {throw "$Service disconnected. Please connect using Connect-OcmsService."}
+                    else {Write-Error "$Service disconnected. Errors may occur. ThrowOnFail set to false."}
+            }
+        }
+
+        'Exchange' {
+            try {
+                Get-OrganizationConfig -ErrorAction Stop | Out-Null
+                Write-Verbose "$Service confirmed connected."
+                return $true
+            }
+            catch {
+                if ($ThrowOnFail) {throw "$Service disconnected. Please connect using Connect-OcmsService."}
+                    else {Write-Error "$Service disconnected. Errors may occur. ThrowOnFail set to false."}
+            }
+        }
+
+        'IPPS' {
+            try {
+                Get-OMEConfiguration -ErrorAction Stop | Out-Null
                 Write-Verbose "$Service confirmed connected."
                 return $true
             }
