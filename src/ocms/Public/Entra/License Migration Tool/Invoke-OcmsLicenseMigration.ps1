@@ -16,8 +16,8 @@ function Invoke-OcmsLicenseMigration {
     # Validate environment
     Test-OcmsModule -Module PowerShell -Version 7 -ThrowOnFail $true
     Test-OcmsModule -Module PnP
-    Test-OcmsConnection -Service "PnP"
-    Test-OcmsConnectoin -Service "Graph"
+    Test-OcmsConnection -Service PnP
+    Test-OcmsConnectoin -Service Graph
 
     # Define logging class
     class LicenseChangeMatrix {
