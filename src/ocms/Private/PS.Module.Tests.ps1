@@ -6,11 +6,10 @@ function Test-OcmsModule {
         [version]$Version,
 
         [ValidateCount(1)]
-        [ValidateSet("PowerShell", "SharePoint", "Graph", "PnP", IgnoreCase = $false)]
+        [ValidateSet("PowerShell", "SharePoint", "Graph", "PnP", "Exchange", IgnoreCase = $false)]
         [Parameter()]
         [string]$Module,
 
-        # set sensible defaults instead of manual null checks later
         [Parameter()]
         [Boolean]$ThrowOnFail = $true,
 
@@ -18,19 +17,17 @@ function Test-OcmsModule {
         [Boolean]$AutoInstall = $false
     )
 
-    # map friendly name to actual module id without overwriting original $Module
     $ModuleName = $Module
     switch ($Module) {
         'SharePoint' {$ModuleName = "Microsoft.Online.SharePoint.PowerShell"}
         'Graph'      {$ModuleName = "Microsoft.Graph"}
         'PnP'        {$ModuleName = "PnP.PowerShell"}
+        'Exchange'   {$ModuleName = "ExchangeOnlineManagement"}
     }
 
-    # PowerShell specific section due to different handling of PowerShell versions.
     if ($ModuleName -eq "PowerShell") {
         $InstalledVersion = $PSVersionTable.PSVersion
 
-        # compare as versions (no quotes)
         if ($InstalledVersion -ge $Version) { 
             Write-Verbose "Version test pass. Required: $Version. Current: $InstalledVersion"
             return $true
@@ -57,11 +54,9 @@ function Test-OcmsModule {
         }
     }
 
-    #Version + Installation handling of standard modules.
     else {
         Write-Verbose "Now checking $ModuleName installation status."
 
-        # Get-Module does NOT throw when module missing; capture result and branch
         try {$found = Get-Module -ListAvailable -Name $ModuleName -ErrorAction SilentlyContinue} 
         
         catch {
@@ -87,7 +82,6 @@ function Test-OcmsModule {
                                 return $false 
                             }
                     }
-                    # else fall through to AutoInstall block
                 }
         }
         else {
