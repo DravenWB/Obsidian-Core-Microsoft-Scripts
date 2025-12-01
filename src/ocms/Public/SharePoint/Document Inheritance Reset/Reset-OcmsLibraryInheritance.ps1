@@ -117,7 +117,7 @@ function Reset-OcmsLibraryInheritance {
                     }
 
             #If the operator set parameters for logging, record data and output to CSV in batches.
-            if ($LoggingFileName -ne $null)
+            if ($null -ne $LoggingFileName)
                 {
                     #Write data to instantiated class object for temporary storage and file output.
                     $DataTable = New-Object -TypeName InheritanceChange -Property $([Ordered]@{
@@ -175,7 +175,7 @@ function Reset-OcmsLibraryInheritance {
         }
 
     #Output remaining data to file.
-    if ($LoggingFileName -ne $null)
+    if ($null -ne $LoggingFileName)
         {
             #If the index has processed the selected amount of items, output to file and clear for next file.
                     Write-Host -ForegroundColor Green "Outputting remaining data to file..."
