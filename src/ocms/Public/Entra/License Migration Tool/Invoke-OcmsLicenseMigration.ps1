@@ -8,7 +8,9 @@ function Invoke-OcmsLicenseMigration {
         [string]$LicenseToRemove,
 
         [Parameter()]
-        [string]$LogPath = (Join-Path $env:USERPROFILE "Desktop\LicenseMigrationLog.csv")
+        [string]$LogPath = [Environment]::GetFolderPath("Desktop"),
+
+        [string]$FileName = "LicenseMigrationLog.csv"
     )
 
     # Validate environment
@@ -26,15 +28,22 @@ function Invoke-OcmsLicenseMigration {
         [string] ${NewLicense}
         [string] ${Errors}
 
-        LicenseChangeMatrix([string]$Date, [string]$Time, [string]$UserUPN,
-                            [string]$OriginalLicense, [string]$NewLicense, [string]$Errors) {
-            $this.Date = $Date
-            $this.Time = $Time
-            $this.UserUPN = $UserUPN
-            $this.OriginalLicense = $OriginalLicense
-            $this.NewLicense = $NewLicense
-            $this.Errors = $Errors
-        }
+        LicenseChangeMatrix(
+            [string]$Date,
+            [string]$Time, 
+            [string]$UserUPN,          
+            [string]$OriginalLicense, 
+            [string]$NewLicense, 
+            [string]$Errors) 
+
+            {
+                $this.Date = $Date
+                $this.Time = $Time
+                $this.UserUPN = $UserUPN
+                $this.OriginalLicense = $OriginalLicense
+                $this.NewLicense = $NewLicense
+                $this.Errors = $Errors
+            }
     }
 
     # Use List for efficiency
@@ -51,17 +60,20 @@ function Invoke-OcmsLicenseMigration {
 
     foreach ($User in $Users) {
         $Upn = $User.UserPrincipalName
-        $XError = ""  # Initialize per iteration
+        $XError = ""
 
         if ($PSCmdlet.ShouldProcess("User $Upn", "Replace $LicenseToRemove with $LicenseToAdd")) {
             try {
                 Set-MgUserLicense -UserId $Upn -AddLicenses @{SkuId = $AddLicenseSku.SkuId} -RemoveLicenses @($RemoveLicenseSku.SkuId)
                 Write-Verbose -ForegroundColor Green "Updated $Upn from $LicenseToRemove to $LicenseToAdd"
-            } catch {
-                $XError = "Couldn't replace $Upn's $LicenseToRemove with $LicenseToAdd"
-                Write-Error -ForegroundColor Red $XError
+            } 
+                catch {
+                   $XError = "Couldn't replace $Upn's $LicenseToRemove with $LicenseToAdd"
+                  Write-Error -ForegroundColor Red $XError
             }
-        } else {
+        } 
+
+        else {
             Write-Host -ForegroundColor Yellow "WhatIf: $Upn would have been updated from $LicenseToRemove to $LicenseToAdd"
         }
 
@@ -74,15 +86,12 @@ function Invoke-OcmsLicenseMigration {
             $LicenseToAdd,
             $XError
         )
+
         $LicenseChangeIndex.Add($Object)
     }
 
     # Export log
-    try {
-        $LicenseChangeIndex | Export-Csv -Path $LogPath -NoClobber -Force
-        Write-Verbose -ForegroundColor Green "Log exported to $LogPath"
-    } catch {
-        Write-Error -ForegroundColor Red "Failed to save CSV: $_"
-    }
-    Write-Host -ForegroundColor Green "All operations complete!"
+    Write-OcmsLog -Data $LicenseChangeIndex -Path $LogPath -FileName $FileName
+
+    Write-Host -ForegroundColor Green "License migration complete."
 }
