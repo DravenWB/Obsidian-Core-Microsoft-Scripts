@@ -1,1 +1,0 @@
-Explanation of profile storage, json structure
