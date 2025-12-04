@@ -28,3 +28,10 @@ Similar to pull requests, any issues reported should be thoroughly researched an
 <sup>2. It should be said that all scripts I write and place in this repository are tested and debugged live. I will not upload a script I do not have full confidence in. Regardless, it is highly recommended that you review a script thoroughly prior to running them to ensure you are fully aware of their functions. </sup>
 
 <sup>3. At this time, I don't support On-Prem PowerShell scripts as I am unfamiliar enough to not be confident in the scripts I write. I may reconsider this in the future though it is unlikely. </sup>
+
+### Function Reference
+
+- [Global Functions](docs/functions/Global.md)
+- [SharePoint Functions](docs/functions/SharePoint.md)
+- [Entra Functions](docs/functions/Entra.md)
+- [Purview Functions](docs/functions/Purview.md)
