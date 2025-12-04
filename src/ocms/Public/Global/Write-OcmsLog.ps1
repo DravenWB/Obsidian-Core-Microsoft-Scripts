@@ -1,4 +1,27 @@
-Write-OcmsLog {
+function Write-OcmsLog {
+
+    <#
+    .SYNOPSIS
+    Short description
+
+    .DESCRIPTION
+    Long description.
+
+    .PARAMETER Param1
+    Parameter description
+
+    .PARAMETER Param2
+    Parameter2 description
+
+    .EXAMPLE
+    Example command usage.
+
+    .NOTES
+    Author: DravenWB (GitHub)
+    Module:
+    Last Updated:
+    #>
+
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
@@ -23,7 +46,7 @@ Write-Verbose "Testing output to $CompletePath"
 
 if (Test-Path $CompletePath) {
     try {
-        Export-Csv -InputObject $Data -Path $CompletePath
+        Export-Csv -InputObject $Data -Path $CompletePath -NoClobber
         Write-Verbose "File at path already exists. Attempting modified file name."
     
         $CompletePath = $LogPath + "\$FileName" + "-$LogModifier"
@@ -37,7 +60,7 @@ if (Test-Path $CompletePath) {
             try {
                 $BackupModifier = (Get-Date).Second
                 $CompletePath = $LogPath + "\$FileName" + "-$LogModifier" + "-$BackupModifier"
-                Export-Csv -InputObject $Data -Path $CompletePath
+                Export-Csv -InputObject $Data -Path $CompletePath -NoClobber
 
                 Write-Verbose "Secondary file succeeded in save operation."
             }
@@ -51,4 +74,4 @@ if (Test-Path $CompletePath) {
         }
 }
 
-else {Export-Csv -InputObject $Data -Path $CompletePath}
+else {Export-Csv -InputObject $Data -Path $CompletePath -NoClobber}
