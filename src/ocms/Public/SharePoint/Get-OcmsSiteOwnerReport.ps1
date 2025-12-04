@@ -1,22 +1,24 @@
 function Get-OcmsSiteOwnerReport {
     <#
     .SYNOPSIS
-    Gets site owners for every site in a tenant.
+    Short description
 
     .DESCRIPTION
-    Returns a detailed report of site owners across all tenant sites, exported as CSV.
+    Long description.
 
-    .PARAMETER Pending
-    Pending module re-write completion.
+    .PARAMETER Param1
+    Parameter description
 
-    .PARAMETER OutputPath
-    Pending module re-write completion.
+    .PARAMETER Param2
+    Parameter2 description
 
     .EXAMPLE
-    Pending module re-write completion.
+    Example command usage.
 
     .NOTES
-    Internal helper functions: Get-OcmsConnection, Write-OcmsLog
+    Author: DravenWB (GitHub)
+    Module:
+    Last Updated:
     #>
 
     param(

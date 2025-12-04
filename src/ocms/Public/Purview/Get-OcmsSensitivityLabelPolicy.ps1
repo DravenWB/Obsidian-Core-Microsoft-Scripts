@@ -1,5 +1,28 @@
 Get-OcmsSensitivityLabelPolicy {
     [CmdletBinding()]
+
+    <#
+    .SYNOPSIS
+    Short description
+
+    .DESCRIPTION
+    Long description.
+
+    .PARAMETER Param1
+    Parameter description
+
+    .PARAMETER Param2
+    Parameter2 description
+
+    .EXAMPLE
+    Example command usage.
+
+    .NOTES
+    Author: DravenWB (GitHub)
+    Module:
+    Last Updated:
+    #>
+
     param (
         [ValidateCount(1)]
         [Parameter()]
