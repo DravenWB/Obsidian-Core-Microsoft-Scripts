@@ -3,24 +3,43 @@ function Invoke-OcmsLicenseMigration {
 
     <#
     .SYNOPSIS
-    Short description
+    Tailor made license migration tool.
 
     .DESCRIPTION
-    Long description.
+    This tool manually identifies all users in a tenant with a license, and replaces that license in case Active Directory group is not setup for a tenant.
 
-    .PARAMETER Param1
-    Parameter description
+    .PARAMETER LicenseToAdd
+    This is the license that should be given to a user. Use the License String ID from: https://learn.microsoft.com/en-us/entra/identity/users/licensing-service-plan-reference
 
-    .PARAMETER Param2
-    Parameter2 description
+    .PARAMETER LicenseToRemove
+    This parameter is used to remove a license from a user and is used to identify users to apply the LicenseToAdd. Use the License String ID from: https://learn.microsoft.com/en-us/entra/identity/users/licensing-service-plan-reference
+
+    .PARAMETER LogPath
+    This parameter sets the location you would like logs to be saved to.
+    Default: User desktop
+
+    .PARAMETER FileName
+    The name of the log file you wish to save.
+    Default: LicenseMigrationLog.csv
 
     .EXAMPLE
-    Example command usage.
+    Invoke-OcmsLicenseMigration -LicenseToAdd SPE_E5 -LicenseToRemove SPE_E3
+
+    .EXAMPLE
+    Invoke-OcmsLicenseMigration -LicenseToAdd SPE_E5 -LicenseToRemove SPE_E3 -LogPath ~/Documents/Logs/ -FileName LicenseMigrationLog.csv
+
+    .EXAMPLE
+    Invoke-OcmsLoicenseMigration -LicenseToAdd SPE_E5 -LicenseToRemove SPE_E3 -FileName LicenseMigrationLog.csv
 
     .NOTES
+    Planned Updates:
+        Allow for and handle multiple license input.
+        Allow for license assignment without removing a license.
+        Allow for license removal without applying a replacement license.
+
     Author: DravenWB (GitHub)
-    Module:
-    Last Updated:
+    Module: OCMS PowerShell
+    Last Updated: December 06, 2025
     #>
 
     param (
@@ -35,6 +54,9 @@ function Invoke-OcmsLicenseMigration {
 
         [string]$FileName = "LicenseMigrationLog.csv"
     )
+
+    # Review and testing is necessary before anyone should even attempt to use this.
+    throw "This function is not ready for use at this time. Additional changes, review and testing required."
 
     # Validate environment
     Test-OcmsModule -Module PowerShell -Version 7 -ThrowOnFail $true

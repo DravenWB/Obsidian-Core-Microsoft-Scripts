@@ -1,10 +1,10 @@
 function New-OcmsTestListItems {
     <#
     .SYNOPSIS
-    Short description
+    Test list item generator.
 
     .DESCRIPTION
-    Long description.
+    Generates list items for testing scenarios. Ex: Some issues can only be tested with a list of 100,000 items. This generates those items.
 
     .PARAMETER Param1
     Parameter description
@@ -16,17 +16,20 @@ function New-OcmsTestListItems {
     Example command usage.
 
     .NOTES
+    Planned Updates:
+        Implement parameters
+        Modularize
+        Implement logging
+        
     Author: DravenWB (GitHub)
-    Module:
-    Last Updated:
+    Module: OCMS PowerShell
+    Last Updated: December 06, 2025
     #>
 
-    param(
-        [Parameter(Mandatory)]
-        [string]$TenantId,
+    param()
 
-        [string]$OutputPath
-    )
+    # Review and testing is necessary before anyone should even attempt to use this.
+    throw "This function is not ready for use at this time. Additional changes, review and testing required."
 
     Test-OcmsPSVersion -Version 7
 

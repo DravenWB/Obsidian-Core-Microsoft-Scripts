@@ -15,24 +15,29 @@ function Reset-OcmsLibraryInheritance {
 
     <#
     .SYNOPSIS
-    Short description
+    SharePoint document library inheritance reset.
 
     .DESCRIPTION
-    Long description.
+    Resets inheritance of documents in SharePoint libraries over the size of 100,000 documents (SharePoint Limitation) and logs changes.
 
-    .PARAMETER Param1
-    Parameter description
+    .PARAMETER LibraryName
+    Name of the document library to be reset.
 
-    .PARAMETER Param2
-    Parameter2 description
+    .PARAMETER ThrowOnFail
+    Whether or not to exit on reset failure.
 
     .EXAMPLE
     Example command usage.
 
     .NOTES
+    Planned Updates:
+        Complete module overhaul.
+        Finish param implementation.
+        Incorporate Global modules to keep code DRY.
+        
     Author: DravenWB (GitHub)
-    Module:
-    Last Updated:
+    Module: OCMS PowerShell
+    Last Updated: December 06, 2025
     #>
 
     [CmdletBinding()]
@@ -46,6 +51,9 @@ function Reset-OcmsLibraryInheritance {
         [Parameter()]
         [boolean]$ThrowOnFail
     )
+
+    # Review and testing is necessary before anyone should even attempt to use this.
+    throw "This function is not ready for use at this time. Additional changes, review and testing required."
 
     Test-OcmsPSVersion -Version 7
     Test-OcmsPnPInstall
@@ -201,26 +209,24 @@ function Reset-OcmsLibraryInheritance {
     if ($null -ne $LoggingFileName)
         {
             #If the index has processed the selected amount of items, output to file and clear for next file.
-                    Write-Host -ForegroundColor Green "Outputting remaining data to file..."
+            Write-Host -ForegroundColor Green "Outputting remaining data to file..."
 
-                    #Try to save the current data to file under the selected location.
-                    try
-                        {
-                            $Time = Get-Date -Format "HH mm"
-                            $Path = $LoggingPath += $LoggingFileName += $Time += ".csv"
-                            $LoggingIndex | Export-Csv -Path $Path -NoClobber
-                        }
-                                        
-                        #If saving fails, most commonly due to file name errors, rename the file and output again using the time to avoid duplicates a second time.
-                        catch
-                            {
-                                $Time = Get-Date -Format "HH mm"
-                                $Path = $LoggingPath += $LoggingFileName += $Time += "_Mod.csv"
+            #Try to save the current data to file under the selected location.
+            try {
+                $Time = Get-Date -Format "HH mm"
+                $Path = $LoggingPath += $LoggingFileName += $Time += ".csv"
+                $LoggingIndex | Export-Csv -Path $Path -NoClobber
+            }
+                                
+                #If saving fails, most commonly due to file name errors, rename the file and output again using the time to avoid duplicates a second time.
+                catch {
+                    $Time = Get-Date -Format "HH mm"
+                    $Path = $LoggingPath += $LoggingFileName += $Time += "_Mod.csv"
 
-                                $LoggingIndex | Export-Csv -Path $Path -NoClobber
+                    $LoggingIndex | Export-Csv -Path $Path -NoClobber
 
-                                $LoggingIndex = $null
-                            }
+                    $LoggingIndex = $null
+                }
         }
 
     ####################################################################################################################################################################################

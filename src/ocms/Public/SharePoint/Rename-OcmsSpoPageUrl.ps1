@@ -1,10 +1,10 @@
 function Rename-OcmsSpoPageUrl {
     <#
     .SYNOPSIS
-    Short description
+    SharePoint page URL corrector.
 
     .DESCRIPTION
-    Long description.
+    Tailor made for a customer who had a botched SharePoint page migration.
 
     .PARAMETER Param1
     Parameter description
@@ -16,17 +16,20 @@ function Rename-OcmsSpoPageUrl {
     Example command usage.
 
     .NOTES
+    Planned Updates:
+        Complete refactor
+        Replace manual interactions.
+        Implement parameters.
+
     Author: DravenWB (GitHub)
-    Module:
-    Last Updated:
+    Module: OCMS PowerShell
+    Last Updated: December 06, 2025
     #>
 
-    param(
-        [Parameter(Mandatory)]
-        [string]$TenantId,
+    param()
 
-        [string]$OutputPath
-    )
+    # Review and testing is necessary before anyone should even attempt to use this.
+    throw "This function is not ready for use at this time. Additional changes, review and testing required."
 
     Test-OcmsPSVersion -Version 7
     Test-OcmsPnPInstall
@@ -64,29 +67,39 @@ function Rename-OcmsSpoPageUrl {
     #Process the site pages of every site to ensure the properties of that page matches the site it is located on.
     foreach ($Site in $SiteDirectory)
     {
-        $Context.Load($Site) #Call the context to load the site.
-        $Context.ExecuteQuery
+        #Load the site context.
+        $Context.Load($Site)
+        $Context.ExecuteQuery()
 
-        #Get dynamicly generated, relative URL for comparison with SharePoint Page property.
-        $SiteRefURL = ("/sites/" + ((Get-SPOSite -Identity "https://spocotest.sharepoint.com/sites/Testsite65").Url -split("/"))[-1] + "/" + "SitePages")
+        #Get dynamically generated, relative URL for comparison with SharePoint Page property.
+        #Example result: /sites/SiteName/SitePages
+        $SiteName = ($Site.Url -split "/")[-1]
+        $SiteRefURL = "/sites/$SiteName/SitePages"
 
         #Get all pages that do not start with the relative site URL.
-        $CurrentSitePages = Get-PnPListItem -List "Site Pages" | Where-Object {-Not $_.FieldValues.FileRef.StartsWith($SiteRefURL)}
+        $CurrentSitePages = Get-PnPListItem -List "Site Pages" |
+            Where-Object { -Not $_.FieldValues.FileRef.StartsWith($SiteRefURL) }
 
         #For all pages that don't match and have broken navigation...
         foreach ($Page in $CurrentSitePages)
         {
             #Load the page context.
             $Context.Load($Page)
-            $Context.ExecuteQuery
+            $Context.ExecuteQuery()
 
             #Set the page URL properties.
-            [string]$FileLeafRef_New = $SiteRefURL + "/" + $Page.FileLeafRef
+            [string]$FileLeafRef_New = $SiteRefURL + "/" + $Page.FieldValues.FileLeafRef
 
             #Set field values and trigger save under new version to allow for reversion if required.
-            try {Set-PnPListItem -List $Page.FileLeafRef -Values @{"FileRef" = $FileLeafRef_New; "FileDirRef" = $SiteRefURL} -UpdateType Update}
-                catch
-                    {Write-Error "An error has occurred in configuring the new page properties: $_"}
+            try {
+                Set-PnPListItem -List "Site Pages" -Identity $Page.Id -Values @{
+                    "FileRef"   = $FileLeafRef_New
+                    "FileDirRef" = $SiteRefURL
+                } -UpdateType Update
+            }
+            catch {
+                Write-Error "An error has occurred in configuring the new page properties: $_"
+            }
         }
     }
 }

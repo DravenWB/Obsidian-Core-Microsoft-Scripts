@@ -27,12 +27,13 @@
 #Set error view and action for clean entry into the output file. Additionally gets the operator's current setting to change it back at script cleanup time. 
 
 function Get-OcmsFunction {
+
     <#
     .SYNOPSIS
-    Short description
+    SharePoint PUID Mismatch Handler
 
     .DESCRIPTION
-    Long description.
+    This script is built to reset PUID mismatches for a user that is experiencing issues with sharing files, accessing sites they've been given permissions to, etc.
 
     .PARAMETER Param1
     Parameter description
@@ -44,17 +45,20 @@ function Get-OcmsFunction {
     Example command usage.
 
     .NOTES
+    Planned Updates:
+        Complete function refactor.
+        Implement param inputs.
+        Complete documentation refinement.
+        
     Author: DravenWB (GitHub)
-    Module:
-    Last Updated:
+    Module: OCMS PowerShell
+    Last Updated: December 06, 2025
     #>
 
-    param(
-        [Parameter(Mandatory)]
-        [string]$TenantId,
+    param()
 
-        [string]$OutputPath
-    )
+    # Review and testing is necessary before anyone should even attempt to use this.
+    throw "This function is not ready for use at this time. Additional changes, review and testing required."
 
     #Get operator current error output length and set to concise.
     $OriginalErrorView = $ErrorView
@@ -84,37 +88,6 @@ function Get-OcmsFunction {
     Write-Host "Commercial Example: UPN@tenant.com"
     Write-Host " "
     $SharePointAdminUPN = Read-Host "Email"
-
-    Write-Host " "function Get-OcmsFunction {
-        <#
-        .SYNOPSIS
-        Short description
-
-        .DESCRIPTION
-        Long description.
-
-        .PARAMETER Param1
-        Parameter description
-
-        .PARAMETER Param2
-        Parameter2 description
-
-        .EXAMPLE
-        Example command usage.
-
-        .NOTES
-        Internal helper functions, attributions, dates, etc.
-        #>
-
-        param(
-            [Parameter(Mandatory)]
-            [string]$TenantId,
-
-            [string]$OutputPath
-        )
-
-        # Function body...
-    }
 
     #Get the UPN to run the UIL PUID mismatch for.
     Write-Host "Please enter the email of the user to run a PUID mismatch for."
@@ -170,36 +143,7 @@ function Get-OcmsFunction {
     #Data storage class definition.
     class OperationData
     {
-        [int]    $Indfunction Get-OcmsFunction {
-        <#
-        .SYNOPSIS
-        Short description
-
-        .DESCRIPTION
-        Long description.
-
-        .PARAMETER Param1
-        Parameter description
-
-        .PARAMETER Param2
-        Parameter2 description
-
-        .EXAMPLE
-        Example command usage.
-
-        .NOTES
-        Internal helper functions, attributions, dates, etc.
-        #>
-
-        param(
-            [Parameter(Mandatory)]
-            [string]$TenantId,
-
-            [string]$OutputPath
-        )
-
-        # Function body...
-    }ex
+        [int]    $Indfunction Get-OcmsFunction {}
         [string] $Date
         [string] $AdminCheckTime
         [string] $Location

@@ -2,24 +2,45 @@ function Connect-OcmsService {
 
     <#
     .SYNOPSIS
-    Short description
+    OCMS Module for connecting to a variety of services in a unified and easy manner.
 
     .DESCRIPTION
-    Long description.
+    This module allows you to connect to SharePoint, Exchange, IPPS, Graph and PnP PowerShell services by using a single function call.
 
-    .PARAMETER Param1
-    Parameter description
+    .PARAMETER Service
+    Select the service you want to connect to.
+    Valid Options: SharePoint, Exchange, IPPS, Graph, PnP
+    Defaults: None
 
-    .PARAMETER Param2
-    Parameter2 description
+    .PARAMETER TenantDomain
+    Domain of the tenant you are connecting to. Ex: In contoso.onmicrosoft.com, the domain is "contoso".
+    Defaults: None
+
+    .PARAMETER Environment
+    Type of environment you are connecting to.
+    Valid Options: Commercial, GCCH, Germany, China
+    Default: Commercial
+
+    .PARAMETER AdminUPN
+    UPN of the administrator connecting. In john.doe@contoso.com, the UPN is "john.doe".
 
     .EXAMPLE
-    Example command usage.
+    Connect-OcmsService -Service SharePoint -TenantDomain contoso
+
+    .EXAMPLE
+    Connect-OcmsService -Service IPPS -TenantDomain contoso -Environment Germany -AdminUPN john.doe
+
+    .EXAMPLE
+    Connect-OcmsService -Service Exchange -TenantDomain contoso -Environment GCCH -AdminUPN john.doe
+
 
     .NOTES
+    Planned Updates:
+        Reformat code to be more DRY.
+
     Author: DravenWB (GitHub)
-    Module:
-    Last Updated:
+    Module: OCMS PowerShell
+    Last Updated: December 06, 2025
     #>
 
     [CmdletBinding()]
@@ -38,10 +59,13 @@ function Connect-OcmsService {
         [ValidateSet("Commercial", "GCCH", "Germany", "China")]
         [string]$Environment = "Commercial",
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [ValidateCount(1)]
         [string]$AdminUPN
     )
+
+    # Review and testing is necessary before anyone should even attempt to use this.
+    throw "This function is not ready for use at this time. Additional changes, review and testing required."
 
     switch($Environment)
         {

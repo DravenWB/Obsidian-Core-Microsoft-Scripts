@@ -1,10 +1,10 @@
 function Invoke-OcmsPermissionsCleanup {
     <#
     .SYNOPSIS
-    Short description
+    Admin permissions cleaner.
 
     .DESCRIPTION
-    Long description.
+    Removes an admin as a site collection administrator from all sites that they do not own.
 
     .PARAMETER Param1
     Parameter description
@@ -16,17 +16,20 @@ function Invoke-OcmsPermissionsCleanup {
     Example command usage.
 
     .NOTES
+    Planned Updates:
+        Cleanup and finish implementing parameters.
+        Expand functionality.
+        Implement logging.
+        
     Author: DravenWB (GitHub)
-    Module:
-    Last Updated:
+    Module: OCMS PowerShell
+    Last Updated: December 06, 2025
     #>
 
-    param(
-        [Parameter(Mandatory)]
-        [string]$TenantId,
+    param()
 
-        [string]$OutputPath
-    )
+    # Review and testing is necessary before anyone should even attempt to use this.
+    throw "This function is not ready for use at this time. Additional changes, review and testing required."
 
     Test-OcmsSpoConnection
 

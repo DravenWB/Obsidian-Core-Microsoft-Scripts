@@ -30,7 +30,7 @@ function Test-OcmsConnection {
     .NOTES
     Author: DravenWB (GitHub)
     Module: OCMS PowerShell
-    Last Updated: December 04, 2025
+    Last Updated: December 06, 2025
     #>
 
     $Failures = [System.Collections.Generic.List[object]]::new()
@@ -46,6 +46,9 @@ function Test-OcmsConnection {
         [Parameter()]
         [Boolean]$ThrowOnFail = $true
     )
+
+    # Review and testing is necessary before anyone should even attempt to use this.
+    throw "This function is not ready for use at this time. Additional changes, review and testing required."
 
     foreach ($Item in $Service) {
         try {

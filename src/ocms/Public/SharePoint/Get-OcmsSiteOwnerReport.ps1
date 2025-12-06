@@ -1,32 +1,37 @@
 function Get-OcmsSiteOwnerReport {
     <#
     .SYNOPSIS
-    Short description
+    Get report of tenant site owners.
 
     .DESCRIPTION
-    Long description.
+    Gathers a report of every site owner, for every site in the entire tenant. Expands upon existing MS functionality that only returns the main site collection owner and not the rest.
 
-    .PARAMETER Param1
-    Parameter description
-
-    .PARAMETER Param2
-    Parameter2 description
+    .PARAMETER FileName
+    The name of the file to log the report to.
+    Default: SiteOwnerReport.csv
 
     .EXAMPLE
-    Example command usage.
+    Get-OcmsSiteOwnerReport -FileName SiteOwnerReport.csv
 
     .NOTES
+    Planned Updates:
+        Standardize dynamic file handling
+        Convert object to table
+        Improve memory usage
+        
     Author: DravenWB (GitHub)
-    Module:
-    Last Updated:
+    Module: OCMS PowerShell
+    Last Updated: December 06, 2025
     #>
 
     param(
         [Parameter(Mandatory)]
-        [string]$TenantId,
-
-        [string]$OutputPath
+        [ValidateCount(1)]
+        [string]$FileName = "SiteOwnerReport.csv"
     )
+
+    # Review and testing is necessary before anyone should even attempt to use this.
+    throw "This function is not ready for use at this time. Additional changes, review and testing required."
 
     #Custom function to test spo connection status.
     Test-OcmsSpoConnection

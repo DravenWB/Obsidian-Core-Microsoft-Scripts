@@ -2,24 +2,41 @@ function Test-OcmsModule {
 
     <#
     .SYNOPSIS
-    Short description
+    Module installation tester with installation flags.
 
     .DESCRIPTION
-    Long description.
+    This module allows you to test for whether a module is installed or not. Additionally has flags to automatically install a module for you, if missing, and throw on failure.
 
-    .PARAMETER Param1
-    Parameter description
+    .PARAMETER Version
+    The version of the module you are testing for.
 
-    .PARAMETER Param2
-    Parameter2 description
+    .PARAMETER Module
+    The module you are testing for.
+    Valid Options: PowerShell, SharePoint, Graph, PnP, Exchange
+
+    .PARAMETER ThrowOnFail
+    Whether or not to exit the program if the test fails.
+    Valid Options: $true, $false
+    Default: $true
+
+    .PARAMETER AutoInstall
+    Whether or not to auto-install a module, if it is missing at the time of the test.
+    Valid Options: $true, $false
+    Default: $false
 
     .EXAMPLE
-    Example command usage.
+    Test-OcmsModule -Module PowerShell -Version 7
+
+    .EXAMPLE
+    Test-OcmsModule -Module SharePoint -Version 16.0.267 -AutoInstall $true
+
+    .EXAMPLE
+    Test-OcmsModule -Module PowerShell -Version 5 -ThrowOnFail $false
 
     .NOTES
     Author: DravenWB (GitHub)
-    Module:
-    Last Updated:
+    Module: OCMS PowerShell
+    Last Updated: December 06, 2025
     #>
 
     [CmdletBinding()]
@@ -39,6 +56,9 @@ function Test-OcmsModule {
         [Parameter()]
         [Boolean]$AutoInstall = $false
     )
+
+    # Review and testing is necessary before anyone should even attempt to use this.
+    throw "This function is not ready for use at this time. Additional changes, review and testing required."
 
     $ModuleName = $Module
     switch ($Module) {

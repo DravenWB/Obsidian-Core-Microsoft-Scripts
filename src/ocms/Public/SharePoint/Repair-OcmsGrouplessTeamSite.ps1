@@ -3,24 +3,29 @@ Repair-OcmsGrouplessTeamsSites {
 
     <#
     .SYNOPSIS
-    Short description
+    Groupless teams site repair.
 
     .DESCRIPTION
-    Long description.
+    Tailor made script built for a customer that needed to repair thousands of SharePoint sites with mistakenly removed Teams groups.
+    Script dynamically identifies sites missing groups and recreates the groups as "Private" status, using the original names of replaced groups.
 
-    .PARAMETER Param1
-    Parameter description
+    .PARAMETER LogPath
+    Location to save logs.
 
-    .PARAMETER Param2
-    Parameter2 description
+    .PARAMETER FileName
+    Name of the logfile to be saved.
 
     .EXAMPLE
-    Example command usage.
+    Repair-OcmsGrouplessTeamsSites -FileName SiteRepair.csv
 
     .NOTES
+    Planned Updates:
+        Implement logging logic
+        Review for optimizations
+        
     Author: DravenWB (GitHub)
-    Module:
-    Last Updated:
+    Module: OCMS PowerShell
+    Last Updated: December 06, 2025
     #>
 
     param (
@@ -32,6 +37,9 @@ Repair-OcmsGrouplessTeamsSites {
         [Parameter()]
         [string]$FileName = "OcmsGroupRepair.csv"
     )
+
+    # Review and testing is necessary before anyone should even attempt to use this.
+    throw "This function is not ready for use at this time. Additional changes, review and testing required."
 
     Test-OcmsPSVersion -Version 5.2
     Test-OcmsSpoConnection
