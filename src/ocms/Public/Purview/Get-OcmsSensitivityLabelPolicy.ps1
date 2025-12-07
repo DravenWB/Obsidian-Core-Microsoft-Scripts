@@ -18,8 +18,7 @@ Get-OcmsSensitivityLabelPolicy {
     Get-OcmsSensitivityLabelPolicy -User jane.doe@contoso.com
 
     .NOTES
-    Planned Updates:
-        Data parsing and log output as object instead of writing to terminal.
+    Planned Updates: Ready for testing and debugging (if required.)
 
     Author: DravenWB (GitHub)
     Module: OCMS PowerShell
@@ -31,6 +30,9 @@ Get-OcmsSensitivityLabelPolicy {
         [Parameter()]
         [String]$User
     )
+
+    # Use List for efficiency
+    $SensitivityData = [System.Collections.Generic.List[LicenseChangeMatrix]]::new()
 
     # Review and testing is necessary before anyone should even attempt to use this.
     throw "This function is not ready for use at this time. Additional changes, review and testing required."    
@@ -44,12 +46,18 @@ Get-OcmsSensitivityLabelPolicy {
     $InitEnumLimit = $formatenumerationlimit
     $formatenumerationlimit=-1
 
-    if ($User) {Get-Mailbox -Identity $User | Format-List -ErrorAction SilentlyContinue}
+    if ($User) {$MailboxData = Get-Mailbox -Identity $User | Format-List -ErrorAction SilentlyContinue}
         else {continue}
-    Get-OMEConfiguration | Format-List
-    Get-RMSTemplate -ResultSize Unlimited
-    Get-LabelPolicy | Format-List
-    Get-Label | Format-List
+    $OMEConfig = Get-OMEConfiguration | Format-List
+    $RMSTemplate = Get-RMSTemplate -ResultSize Unlimited
+    $LabelPolicies = Get-LabelPolicy | Format-List
+    $SensitivityLabels Get-Label | Format-List
+
+    if ($User) {Write-OcmsLog -Object $MailboxData -FileName "User_Mailbox_Info.csv"}
+    Write-OcmsLog -Object $OMEConfig -FileName "OME_Configuration.csv"
+    Write-OcmsLog -Object $RMSTemplate -FileName "RMS_Template.csv"
+    Write-OcmsLog -Object $LabelPolicies = "Label_Policy.csv"
+    Write-OcmsLog -Object $SensitivityLabels = "Sensitivity_Labels.csv"
 
     $formatenumerationlimit = $InitEnumLimit
 }
