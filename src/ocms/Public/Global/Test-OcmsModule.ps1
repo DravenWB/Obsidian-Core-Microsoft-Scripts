@@ -34,6 +34,8 @@ function Test-OcmsModule {
     Test-OcmsModule -Module PowerShell -Version 5 -ThrowOnFail $false
 
     .NOTES
+    Planned Updates: Testing and debugging if required.
+
     Author: DravenWB (GitHub)
     Module: OCMS PowerShell
     Last Updated: December 06, 2025
@@ -109,7 +111,6 @@ function Test-OcmsModule {
 
         if ($found) {
             Write-Verbose "Required $ModuleName module is currently installed."
-\
             $best = $found | Sort-Object -Property Version -Descending | Select-Object -First 1
 
             if ($best.Version -ge $Version) { return $true } 
