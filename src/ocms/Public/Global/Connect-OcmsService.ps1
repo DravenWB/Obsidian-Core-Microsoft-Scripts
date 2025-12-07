@@ -35,12 +35,11 @@ function Connect-OcmsService {
 
 
     .NOTES
-    Planned Updates:
-        Reformat code to be more DRY.
+    Planned Updates: Testing and run validation.
 
     Author: DravenWB (GitHub)
     Module: OCMS PowerShell
-    Last Updated: December 06, 2025
+    Last Updated: December 07, 2025
     #>
 
     [CmdletBinding()]
@@ -76,48 +75,36 @@ function Connect-OcmsService {
             default {throw "Unknown Environment: $Environment"}
         }
 
-    switch ($Service) {
-        'SharePoint' {
-            try {Connect-SPOService -Url "https://$TenantDomain-admin.sharepoint.$TenantSuffix" -Region $TenantRegion}
-                catch {
-                    try {Connect-SPOService -Url "https://$TenantDomain-admin.sharepoint.$TenantSuffix" -Credential "$AdminUPN@$Domain.onmicrosoft.$TenantSuffix" -Region $TenantRegion -UseSystemBrowser $true}
+    try {
+        switch ($Service) {
+            'SharePoint' {Connect-SPOService -Url "https://$TenantDomain-admin.sharepoint.$TenantSuffix" -Region $TenantRegion}
+
+            'Exchange' {
+                if ($Environment -eq "Commercial") {
+                    try {Connect-ExchangeOnline -UserPrincipalName "$AdminUPN@$Domain.onmicrosoft.$TenantSuffix"}
                         catch {throw "There were errors connecting to the $Environment $Service Service: $($_.Exception.Message)"}
                 }
-        }
-
-        'Exchange' {
-            if ($Environment -eq "Commercial") {
-                try {Connect-ExchangeOnline -UserPrincipalName "$AdminUPN@$Domain.onmicrosoft.$TenantSuffix"}
-                    catch {throw "There were errors connecting to the $Environment $Service Service: $($_.Exception.Message)"}
-            }
-            else {
-                try {Connect-ExchangeOnline -UserPrincipalName "$AdminUPN@$Domain.onmicrosoft.$TenantSuffix" -ExchangeEnvironmentName $ExchangeEnv}
-                    catch {throw "There were errors connecting to the $Environment $Service Service: $($_.Exception.Message)"}
-            }
-        }
-
-        'IPPS' {
-            try {Connect-IPPSSession -UserPrincipalName "$AdminUPN@$Domain.onmicrosoft.$TenantSuffix" -ConnectionUri $ExchangeConnectURI}
-                catch {throw "There were errors connecting to the $Environment $Service Service: $($_.Exception.Message)"}
-        }
-
-        'Graph' {
-            if ($Environment -eq "Commercial") {
-                try {Connect-MgGraph -Scopes User.ReadWrite.All, Organization.Read.All -NoWelcome}
-                    catch {throw "There were errors connecting to the $Environment $Service Service: $($_.Exception.Message)"}
-            }
-            else {
-                try {Connect-MGgraph -Scopes User.ReadWrite.All, Organization.Read.All -Environment USGov -NoWelcome}
-                    catch {throw "There were errors connecting to the $Environment $Service Service: $($_.Exception.Message)"}
-            }
-        }
-
-        'PnP' {
-            try {Connect-PnPOnline -Url "https://$TenantDomain-admin.sharepoint.$TenantSuffix" -Interactive}
-                catch {
-                    try {Connect-PnPOnline -Url "https://$TenantDomain-admin.sharepoint.$TenantSuffix" -OSLogin}
+                else {
+                    try {Connect-ExchangeOnline -UserPrincipalName "$AdminUPN@$Domain.onmicrosoft.$TenantSuffix" -ExchangeEnvironmentName $ExchangeEnv}
                         catch {throw "There were errors connecting to the $Environment $Service Service: $($_.Exception.Message)"}
                 }
+            }
+
+            'IPPS' {Connect-IPPSSession -UserPrincipalName "$AdminUPN@$Domain.onmicrosoft.$TenantSuffix" -ConnectionUri $ExchangeConnectURI}
+
+            'Graph' {
+                if ($Environment -eq "Commercial") {
+                    try {Connect-MgGraph -Scopes User.ReadWrite.All, Organization.Read.All -NoWelcome}
+                        catch {throw "There were errors connecting to the $Environment $Service Service: $($_.Exception.Message)"}
+                }
+                else {
+                    try {Connect-MGgraph -Scopes User.ReadWrite.All, Organization.Read.All -Environment USGov -NoWelcome}
+                        catch {throw "There were errors connecting to the $Environment $Service Service: $($_.Exception.Message)"}
+                }
+            }
+
+            'PnP' {Connect-PnPOnline -Url "https://$TenantDomain-admin.sharepoint.$TenantSuffix" -Interactive}
         }
     }
+        catch {throw "There were errors connecting to the $Environment $Service Service: $($_.Exception.Message)"}
 }
