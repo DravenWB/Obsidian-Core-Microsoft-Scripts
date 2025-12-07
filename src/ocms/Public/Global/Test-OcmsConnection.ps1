@@ -28,6 +28,8 @@ function Test-OcmsConnection {
     Test-OcmsConnection -Service SharePoint -ThrowOnFail $false
 
     .NOTES
+    Planned Updates: Testing and debugging if needed.
+
     Author: DravenWB (GitHub)
     Module: OCMS PowerShell
     Last Updated: December 06, 2025
