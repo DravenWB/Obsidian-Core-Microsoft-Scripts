@@ -2,8 +2,6 @@
 
 This repository is currently undergoing a major restructure to convert all scripts into a fully functional PowerShell module. During this period, many scripts may be non-functional, incomplete, or moved into new locations.
 
-If you cloned the repo recently: the pre-module scripts still exist, but expect breakage until the transition and update is complete.
-
 # Microsoft PowerShell Scripting
 ### Online Tenant Focused TroubleShooting, Management and Testing
 ![Powershell-1379505758](https://github.com/DravenWB/Microsoft_PowerShell_Scripts/assets/46582061/e94b0d82-69f7-4395-856c-209caa695f9d)
