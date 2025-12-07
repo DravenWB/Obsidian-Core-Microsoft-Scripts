@@ -14,10 +14,7 @@ function Get-OcmsSiteOwnerReport {
     Get-OcmsSiteOwnerReport -FileName SiteOwnerReport.csv
 
     .NOTES
-    Planned Updates:
-        Standardize dynamic file handling
-        Convert object to table
-        Improve memory usage
+    Planned Updates: Ready for testing and debugging (if needed).
         
     Author: DravenWB (GitHub)
     Module: OCMS PowerShell
@@ -25,7 +22,7 @@ function Get-OcmsSiteOwnerReport {
     #>
 
     param(
-        [Parameter(Mandatory)]
+        [Parameter()]
         [ValidateCount(1)]
         [string]$FileName = "SiteOwnerReport.csv"
     )
@@ -47,7 +44,7 @@ function Get-OcmsSiteOwnerReport {
     }
 
     #Generate array to store data.
-    $SiteIndexData= @()
+    $SiteIndexData = [System.Collections.Generic.List]::new()
 
     #Loop to navigate each site and gather ALL owners assigned to each site.
     foreach ($Site in $SiteIndex)
@@ -65,10 +62,9 @@ function Get-OcmsSiteOwnerReport {
             User = $Item.LoginName
             }
 
-            $SiteIndexData += $Object
+            $SiteIndexData.Add($Object)
         }
-
     }
 
-    $SiteIndexData | Export-Csv ~/Desktop/$FileName.csv -Encoding utf8
+    Write-OcmsLog -Object $SiteIndexData -FileName $FileName
 }
