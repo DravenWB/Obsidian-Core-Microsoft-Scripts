@@ -34,7 +34,7 @@ function Write-OcmsLog {
 
     .NOTES
     Planned Updates
-        More robust path validation to prevent potential errors.
+        Ready for testing and filepath validation update once complete to avoid false positives.
         
     Author: DravenWB (GitHub)
     Module: OCMS PowerShell
@@ -96,5 +96,4 @@ function Write-OcmsLog {
     }
 
     else {Export-Csv -InputObject $Data -Path $CompletePath -NoClobber}
-
 }
