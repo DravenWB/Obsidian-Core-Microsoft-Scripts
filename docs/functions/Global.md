@@ -22,13 +22,13 @@ Microsoft has too many connect commands that all differ for one reason or anothe
 
 ### Examples
 
-#### Example 1 — Connecting to SharePoint (Simplest)
+#### Connecting to SharePoint (Simplest)
 `Connect-OcmsService -Service SharePoint -TenantDomain contoso -AdminUPN john.doe`
 
-### Example 2 - Connecting to IPPS with the German Region
+### Connecting to IPPS with the German Region
 `Connect-OcmsService -Service IPPS -TenantDomain contoso -Environment Germany -AdminUPN john.doe`
 
-### Example 3 - Connecting to the GCCH Exchange Environment
+### Connecting to the GCCH Exchange Environment
 `Connect-OcmsService -Service Exchange -TenantDomain contoso -Environment GCCH -AdminUPN john.doe`
 
 ### Planned Updates
@@ -56,13 +56,13 @@ The function accepts multiple service names and consolidates all failures. By de
 
 ### Examples
 
-#### Example 1 - Testing a Single SharePoint Connection
+#### Testing a Single SharePoint Connection
 `Test-OcmsConnection -Service SharePoint`
 
-#### Example 2 - Testing Multiple Services
+#### Testing Multiple Services
 `Test-OcmsConnection -Service SharePoint, Exchange, IPPS`
 
-#### Example 3 - Setting the ThrowOnFail flag.
+#### Setting the ThrowOnFail flag.
 `Test-OcmsConnection -Service SharePoint -ThrowOnFail $false`
 
 ### Planned Updates
@@ -89,13 +89,13 @@ This function allows you to test for whether a module is installed or not. Addit
 
 ### Examples
 
-#### Example 1 - Testing Powershell Version
+#### Testing Powershell Version
 `Test-OcmsModule -Module PowerShell -Version 7`
 
-#### Example 2 - Testing SharePoint Management Shell Installation With Install Flags
+#### Testing SharePoint Management Shell Installation With Install Flags
 `Test-OcmsModule -Module SharePoint -Version 16.0.267 -AutoInstall $true`
 
-#### Example 3 - Disabling the ThrowOnFail Flag
+#### Disabling the ThrowOnFail Flag
 `Test-OcmsModule -Module PowerShell -Version 5 -ThrowOnFail $false`
 
 ### Planned Updates
@@ -122,13 +122,13 @@ Module used for all OCMS log handling. Includes two-stage automated naming confl
 
 ### Examples
 
-#### Example 1 - Basic Usage
+#### Basic Usage
 `Write-OcmsLog -Data $object`
 
-#### Example 2 - Setting the FileName
+#### Setting the FileName
 `Write-OcmsLog -Data $object -FileName ChangeReport.csv`
 
-#### Example 3 - Setting the LogPath and FileName
+#### Setting the LogPath and FileName
 `Write-OcmsLog -Data $object -LogPath ~/Documents/Logs/ -FileName ChangeReport.csv`
 
 ### Planned Updates
