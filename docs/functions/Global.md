@@ -1,6 +1,8 @@
 # Global Modules
 These functions are used in nearly all of the other functions in the module and can be used to bootstrap new additions. They can still be called individually in order to manually conduct tests such as "Test-OcmsConnection" which is setup to test multiple services either individually or in groups. 
 
+&nbsp;
+
 ## Connect-OcmsService
 
 ### Synopsis
@@ -33,6 +35,7 @@ Microsoft has too many connect commands that all differ for one reason or anothe
 - Current version testing and validation.
 - Improve standardization to handle differences in requirements for each command.
 
+&nbsp;
 
 ## Test-OcmsConnection
 
@@ -65,6 +68,7 @@ The function accepts multiple service names and consolidates all failures. By de
 ### Planned Updates
 - Testing and debugging
 
+&nbsp;
 
 ## Test-OcmsModule
 
@@ -97,6 +101,7 @@ This function allows you to test for whether a module is installed or not. Addit
 ### Planned Updates
 - Testing and debugging
 
+&nbsp;
 
 ## Write-OcmsLog
 
