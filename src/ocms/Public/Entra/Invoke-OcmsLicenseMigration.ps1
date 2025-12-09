@@ -6,8 +6,8 @@ function Invoke-OcmsLicenseMigration {
     Tailor made license migration tool.
 
     .DESCRIPTION
-    This tool manually identifies all users in a tenant with a license, and replaces that license in case Active Directory group is not setup for a tenant.
-
+    This tool manually identifies all users in a tenant with a license, and replaces that license in case license grouping is not setup for a tenant.
+    
     .PARAMETER LicenseToAdd
     This is the license that should be given to a user. Use the License String ID from: https://learn.microsoft.com/en-us/entra/identity/users/licensing-service-plan-reference
 
@@ -140,3 +140,4 @@ function Invoke-OcmsLicenseMigration {
 
     Write-Host -ForegroundColor Green "License migration complete."
 }
+        Modularize

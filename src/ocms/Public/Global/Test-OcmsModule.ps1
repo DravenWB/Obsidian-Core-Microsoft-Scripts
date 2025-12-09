@@ -5,7 +5,7 @@ function Test-OcmsModule {
     Module installation tester with installation flags.
 
     .DESCRIPTION
-    This module allows you to test for whether a module is installed or not. Additionally has flags to automatically install a module for you, if missing, and throw on failure.
+    This function allows you to test for whether a module is installed or not. Additionally has flags to automatically install a module for you, if missing, and throw on failure.
 
     .PARAMETER Version
     The version of the module you are testing for.

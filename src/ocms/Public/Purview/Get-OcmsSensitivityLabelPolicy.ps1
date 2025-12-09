@@ -3,7 +3,7 @@ Get-OcmsSensitivityLabelPolicy {
 
     <#
     .SYNOPSIS
-    A simple script to get organizational sensitivity labeling.
+    Sensitivity information retrieval tool.
 
     .DESCRIPTION
     Gather sensitivity labeling with the option to input a user, should you want to get mailbox information for that user at the same time.

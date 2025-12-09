@@ -2,11 +2,11 @@ function Connect-OcmsService {
 
     <#
     .SYNOPSIS
-    OCMS Module for connecting to a variety of services in a unified and easy manner.
+    Microsoft service connection tester.
 
     .DESCRIPTION
-    This module allows you to connect to SharePoint, Exchange, IPPS, Graph and PnP PowerShell services by using a single function call.
-
+    Microsoft has too many connect commands that all differ for one reason or another. This module allows you to connect to SharePoint, Exchange, IPPS, Graph and PnP PowerShell services by using a single, standardized function call.
+    
     .PARAMETER Service
     Select the service you want to connect to.
     Valid Options: SharePoint, Exchange, IPPS, Graph, PnP
@@ -25,7 +25,7 @@ function Connect-OcmsService {
     UPN of the administrator connecting. In john.doe@contoso.com, the UPN is "john.doe".
 
     .EXAMPLE
-    Connect-OcmsService -Service SharePoint -TenantDomain contoso
+    Connect-OcmsService -Service SharePoint -TenantDomain contoso -AdminUPN john.doe
 
     .EXAMPLE
     Connect-OcmsService -Service IPPS -TenantDomain contoso -Environment Germany -AdminUPN john.doe
@@ -58,7 +58,7 @@ function Connect-OcmsService {
         [ValidateSet("Commercial", "GCCH", "Germany", "China")]
         [string]$Environment = "Commercial",
 
-        [Parameter()]
+        [Parameter(Mandatory)]
         [ValidateCount(1)]
         [string]$AdminUPN
     )
