@@ -11,23 +11,42 @@ function Invoke-OcmsPermissionsCleanup {
     Ex: john.doe@contoso.onmicrosoft.com
     Ex: john.doe@contoso.com
 
+    .PARAMETER FileName
+    The name of the log file to be saved.
+    Default: PermissionsChangeReport.csv
+
+    .PARAMETER LogPath
+    The location the log file will be saved to.
+    Default: User desktop.
+
     .EXAMPLE
     Invoke-OcmsPermissionsCleanup -AdminEmail john.doe@contoso.com
+
+    .EXAMPLE
+    Invoke-OcmsPermissionsCleanup -AdminEmail john.doe@contoso.com -FileName PermissionsChangeReport.csv -LogPath ~/Documents/Logs/
 
     .NOTES
     Planned Updates:
         Expand functionality.
-        Implement logging.
+        Testing and debugging (if required).
         
     Author: DravenWB (GitHub)
     Module: OCMS PowerShell
-    Last Updated: December 08, 2025
+    Last Updated: December 09, 2025
     #>
 
     param(
         [Parameter(Mandatory)]
         [ValidateCount(1)]
         [string]$AdminEmail
+
+        [Parameter()]
+        [ValidateCount(1)]
+        [string]$FileName = "PermissionsChangeReport.csv",
+
+        [Parameter()]
+        [ValidateCount(1)]
+        [string]$LogPath = [Environment]::GetFolderPath("Desktop")
     )
 
     # Review and testing is necessary before anyone should even attempt to use this.
@@ -35,38 +54,46 @@ function Invoke-OcmsPermissionsCleanup {
 
     Test-OcmsSpoConnection
 
-    class OperationData {
-        [int]    $Index
-        [string] $Date
-        [string] $Time
-        [string] $Location
-        [bool]   $SiteCollectionAdmin
-        [bool]   $IsSiteOwner
-        [string] $RemovedAsAdmin
-        [string] $XErrors  
+    class Data {
+        [string] ${Date}
+        [string] ${Time}
+        [string] ${Location}
+        [bool]   ${SiteCollectionAdmin}
+        [bool]   ${IsSiteOwner}
+        [string] ${RemovedAsAdmin}
+
+        Data(
+            [string] $Date
+            [string] $Time
+            [string] $Location
+            [bool]   $SiteCollectionAdmin
+            [bool]   $IsSiteOwner
+            [string] $RemovedAsAdmin
+        ){
+            $this.Date = $Date
+            $this.Time = $Time
+            $this.Location = $Location
+            $this.SiteCollectionAdmin = $SiteCollectionAdmin
+            $this.IsSiteOwner = $IsSiteOwner
+            $this.RemovedAsAdmin = $RemovedAsAdmin
+        }
     }
+
+    $PermissionsChangeData = [System.Collections.Generic.List[Data]]::new()
 
     ####################################################################################################################################################################################
 
     Write-Host "Now reviewing all SharePoint sites for administrator and ownership settings..."
     Start-Sleep -Seconds 2
 
-    #Get all sites and assign to variable.
     $SiteDirectory = Get-SPOSite -Limit All -IncludePersonalSite $true
-
-    #Initialize the index counter.
     $IndexCounter = 0
 
     #Filter through every site and check if the operator is an administrator / owner.
     foreach ($Site in $SiteDirectory) {
-        #Display progress bar for admin/owner checks.
-        $ProgressPercent = ($IndexCounter / $SiteDirectory.Count) * 100
-        $ProgressPercent = $ProgressPercent.ToString("#.##")
-        Write-Progress -Activity "Setting Site Admin Permissions..." -Status "$ProgressPercent% Complete:" -PercentComplete $ProgressPercent
-
         #Check if user is part of the site.
         try {
-            Get-SPOUser -Site $Site.Url -LoginName $AdminEmail
+            Get-SPOUser -Site $Site.Url -LoginName $AdminEmail | null
             $UserOnSite = $true
         }
             catch {$UserOnSite = $false}
@@ -79,7 +106,28 @@ function Invoke-OcmsPermissionsCleanup {
             #Get site owner group name(s).
             if ($User.Groups -notcontains (Get-SPOSiteGroup -Site $Site.Url | Where-Object {$_.Roles -contains "Full Control"}).Title) {
                 Set-SPOUser -Site $Site.Url -LoginName $AdminEmail -IsSiteCollectionAdmin $false
+                
+                $UserIsOwner = $true
+                $RemovedAsAdmin = $true
+            }
+
+            else {
+                $UserIsOwner = $false
+                $RemovedAsAdmin = $false
             }
         }
+
+        $Object = [Data]::new(
+            (Get-Date -Format "MM/dd/yyy")
+            (Get-Date -Format "HH mm")
+            $Site.Url
+            $User.IsSiteCollectionAdmin
+            $UserIsOwner
+            $RemovedAsAdmin
+        )
+
+        $PermissionsChangeData.Add($Object)
     }
+
+    Write-OcmsLog -Data $PermissionsChangeData -FileName $FileName -LogPath $LogPath
 }
