@@ -6,19 +6,35 @@ function New-OcmsTestListItems {
     .DESCRIPTION
     Generates list items for testing scenarios. Ex: Some issues can only be tested with a list of 100,000 items. This generates those items.
 
-    .PARAMETER Param1
-    Parameter description
+    .PARAMETER ListName
+    The list to generate items on.
+    Ex: MyList
 
-    .PARAMETER Param2
-    Parameter2 description
+    .PARAMETER Amount
+    The amount of items to generate.
+    Default: 100
+
+    .PARAMETER ItemName
+    What to name the item.
+    Default: TestItem
+
+    .PARAMETER Counter
+    What number to start the counter at.
+    Default: 1
+
+    .PARAMETER 
 
     .EXAMPLE
-    Example command usage.
+    New-OcmsTestListItem -ListName MyList
+
+    .EXAMPLE
+    New-OcmsTestListItem -ListName MyList -Amount 500 -ItemName TestItem
+
+    .EXAMPLE
+    New-OcmsTestListItem -ListName MyList -Amount 500 -ItemName TestItem -Counter 362
 
     .NOTES
     Planned Updates:
-        Implement parameters
-        Modularize
         Implement logging
         
     Author: DravenWB (GitHub)
@@ -26,76 +42,48 @@ function New-OcmsTestListItems {
     Last Updated: December 06, 2025
     #>
 
-    param()
+    param(
+        [Parameter(Mandatory)]
+        [ValidateCount(1)]
+        [string]$ListName,
+
+        [Parameter()]
+        [ValidateCount(1)]
+        [int]$Amount = 100,
+
+        [Parameter()]
+        [ValidateCount(1)]
+        [string]$ItemName = "TestItem",
+
+        [Parameter()]
+        [ValidateCount(1)]
+        [int]$Counter = 1
+    )
 
     # Review and testing is necessary before anyone should even attempt to use this.
     throw "This function is not ready for use at this time. Additional changes, review and testing required."
 
+    #Bootstrap
     Test-OcmsPSVersion -Version 7
+    Test-OcmsPnPInstall
 
     #Check for installed .net version and exit if version is found to be below version 4.8.
     #Version not printed to user as the internal version is not listed as 4.8 (ex.) and is instead listed as a number like "533320" which isn't the most readable.
-
+    #Planned to be later integrated into the module checker.
     [string] $DotNetVersion = Get-ItemPropertyValue -LiteralPath 'HKLM:SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full' -Name Release
-    if ($DotNetVersion -lt "533320")
-        {
+    if ($DotNetVersion -lt "533320") {
             Write-Host -ForegroundColor Red "Your .Net framework installed is currently out of date."
             Write-Host -ForegroundColor Red "To run this script, please update your .Net version to 4.8 or greater."
-            Start-Sleep -Seconds 3
-            Write-Host "Have a great day! :)"
             Exit
         }
             else {continue}
 
-    #Check for installed PnP.PowerShell version and install if missing.
-    Write-Verbose -ForegroundColor Green "Now checking installed PnP.PowerShell Version..."
-
-    Test-OcmsPnPInstall
-
-    #Get the site to generate items for.
-    Write-Host "Please enter the full site URL you would like to generate items for:"
-    Write-Host "Ex: https://contoso.sharepoint.com/sites/SiteName/"
-    $SiteURL = Read-Host "Site"
-
-    #Get the list to generate items in.
-    Write-Host "Please enter the list you would like to generate items for:"
-    Write-Host "Ex: List Name"
-    $ListName = Read-Host "List"
-
-    #Get the amount of items to generate.
-    Write-Host "Please enter the amount of items you would like to generate:"
-    Write-Host "Ex: 1000"
-    [Int] $ItemCount = Read-Host "Amount"
-
-    #Get the name of all items to be generated.
-    Write-Host "Please enter the base name to be used for item generation:"
-    Write-Host "Ex: Test Item"
-    Write-Host "This will generate items such as Test Item 1, Test Item 2, Test Item 3, etc."
-    $ItemName = Read-Host "Name"
-
-    #Connect to the site via PnP.
-    try {Connect-PnPOnline -Url $SiteURL -UseWebLogin}
-        catch {throw "There was an error connecting to SharePoint via PnP PowerShell: $_"}
-
-    #Ask the user for what point they'd like to start the generation at:
-    Write-Host "What number would you like to start generating list items at? (Recommended: 1)"
-    [Int] $Counter = Read-Host "Starting Counter"
-
-    #Confirm operation prior to running:
-    Write-Host "Target Location:" ($SiteURL + $ListName)
-    Write-Host "Amount of items to be generated:" $ItemCount
-    Write-Host "Item Name:" $ItemName
-    Write-Host "Starting Count:" $Counter
-
-    Write-Host "To confirm this operation, please type the word > Accept < (Case Sensitive)."
-    $Validation = Read-Host "Confirmation"
-
-    if ($Validation -ceq "Accept") {
-        #Loop to generate items.
-        do {
-            Add-PnPListItem -List $ListName -Values @{"Title" = "$ItemName $Counter"}
-            $Counter++
-        }
-            while ($Counter -le $ItemCount)
+    Write-Verbose "Generating items..."
+    do {
+        Add-PnPListItem -List $ListName -Values @{"Title" = "$ItemName $Counter"}
+        $Counter++
     }
+        while ($Counter -le $ItemCount)
+
+    Write-Verbose "Generation of $Amount items complete."
 }
