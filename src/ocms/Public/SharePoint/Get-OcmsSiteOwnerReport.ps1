@@ -10,6 +10,9 @@ function Get-OcmsSiteOwnerReport {
     The name of the file to log the report to.
     Default: SiteOwnerReport.csv
 
+    .PARAMETER LogPath
+    The location the log file will be saved to.
+
     .EXAMPLE
     Get-OcmsSiteOwnerReport -FileName SiteOwnerReport.csv
 
@@ -24,47 +27,47 @@ function Get-OcmsSiteOwnerReport {
     param(
         [Parameter()]
         [ValidateCount(1)]
-        [string]$FileName = "SiteOwnerReport.csv"
+        [string]$FileName = "SiteOwnerReport.csv",
+
+        [Parameter()]
+        [ValidateCount(1)]
+        [string]$LogPath = [Environment]::GetFolderPath("Desktop")
     )
 
-    # Review and testing is necessary before anyone should even attempt to use this.
     throw "This function is not ready for use at this time. Additional changes, review and testing required."
 
-    #Custom function to test spo connection status.
     Test-OcmsSpoConnection
 
-    #Gather all sites within the tenant.
-    $SiteIndex = Get-SPOSite -limit ALL
-
-    #Generate object class to store .csv data.
-    class TableData
-    {
+    class Data {
         [string] ${SiteURL}
         [string] ${User}
+
+        Data(
+            [string]$SiteURL
+            [string]$User
+        ){
+            $this.SiteURL = $SiteURL
+            $This.User = $User
+        }
     }
 
-    #Generate array to store data.
     $SiteIndexData = [System.Collections.Generic.List]::new()
 
-    #Loop to navigate each site and gather ALL owners assigned to each site.
-    foreach ($Site in $SiteIndex)
-    {
-        #Set Site title variable for default groups.
+    $SiteIndex = Get-SPOSite -limit ALL
+
+    foreach ($Site in $SiteIndex) {
         $SiteTitle = $Site.Title
+        $SiteOwners = Get-SPOUser -Site $Site.Url -Group "$SiteTitle Owners"
 
-        #Get owners and add them to the site data index.
-        $SiteOwners = Get-SPOUser -Site $Site.Url -Group "$SiteTitle Owners" #Gets all owners on the individual site.
-
-        foreach($Item in $SiteOwners) #Loops through each owner on the site and adds the object
+        foreach($Item in $SiteOwners)
         {
-            $Object = New-Object PSObject -Property @{
-            SiteURL = $Site.Url
-            User = $Item.LoginName
-            }
+            $Object = [Data]::new(
+                ($Site.Url)
+                ($Item.LoginName)
+            )
 
             $SiteIndexData.Add($Object)
         }
     }
-
-    Write-OcmsLog -Object $SiteIndexData -FileName $FileName
+    Write-OcmsLog -Object $SiteIndexData -FileName $FileName -LogPath $LogPath
 }
