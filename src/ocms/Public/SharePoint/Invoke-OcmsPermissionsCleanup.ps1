@@ -6,38 +6,34 @@ function Invoke-OcmsPermissionsCleanup {
     .DESCRIPTION
     Removes an admin as a site collection administrator from all sites that they do not own.
 
-    .PARAMETER Param1
-    Parameter description
-
-    .PARAMETER Param2
-    Parameter2 description
+    .PARAMETER AdminEmail
+    Email address of the administrator being checked against existing sites.
+    Ex: john.doe@contoso.onmicrosoft.com
+    Ex: john.doe@contoso.com
 
     .EXAMPLE
-    Example command usage.
+    Invoke-OcmsPermissionsCleanup -AdminEmail john.doe@contoso.com
 
     .NOTES
     Planned Updates:
-        Cleanup and finish implementing parameters.
         Expand functionality.
         Implement logging.
         
     Author: DravenWB (GitHub)
     Module: OCMS PowerShell
-    Last Updated: December 06, 2025
+    Last Updated: December 08, 2025
     #>
 
-    param()
+    param(
+        [Parameter(Mandatory)]
+        [ValidateCount(1)]
+        [string]$AdminEmail
+    )
 
     # Review and testing is necessary before anyone should even attempt to use this.
     throw "This function is not ready for use at this time. Additional changes, review and testing required."
 
     Test-OcmsSpoConnection
-
-    #Get the admin UPN.
-    Write-Host "Please enter your SharePoint Administrator email for connection and temporary permissions assignment."
-    Write-Host "Commercial Example: UPN@tenant.com"
-    Write-Host " "
-    $SharePointAdminUPN = Read-Host "Email"
 
     class OperationData {
         [int]    $Index
@@ -70,19 +66,19 @@ function Invoke-OcmsPermissionsCleanup {
 
         #Check if user is part of the site.
         try {
-            Get-SPOUser -Site $Site.Url -LoginName $SharePointAdminUPN
-            $Run = $true
+            Get-SPOUser -Site $Site.Url -LoginName $AdminEmail
+            $UserOnSite = $true
         }
-            catch {$Run = $false}
+            catch {$UserOnSite = $false}
 
         #Check if operator is part of the site.
-        if ($Run) {
+        if ($UserOnSite) {
             #Get user data for site.
-            $User = Get-SPOUser -Site $Site.Url -LoginName $SharePointAdminUPN
+            $User = Get-SPOUser -Site $Site.Url -LoginName $AdminEmail
 
             #Get site owner group name(s).
             if ($User.Groups -notcontains (Get-SPOSiteGroup -Site $Site.Url | Where-Object {$_.Roles -contains "Full Control"}).Title) {
-                Set-SPOUser -Site $Site.Url -LoginName $SharePointAdminUPN -IsSiteCollectionAdmin $false
+                Set-SPOUser -Site $Site.Url -LoginName $AdminEmail -IsSiteCollectionAdmin $false
             }
         }
     }
