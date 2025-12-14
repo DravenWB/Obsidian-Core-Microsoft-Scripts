@@ -33,3 +33,5 @@ Similar to pull requests, any issues reported should be thoroughly researched an
 - [SharePoint Functions](docs/functions/SharePoint.md)
 - [Entra Functions](docs/functions/Entra.md)
 - [Purview Functions](docs/functions/Purview.md)
+
+Jujutsu test.
